@@ -1,4 +1,4 @@
-# ObjFileRenderer
+# Obj File Renderer
 
 **Insert a demo gif here**
 
