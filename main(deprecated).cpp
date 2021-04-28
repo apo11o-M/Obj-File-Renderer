@@ -1,19 +1,16 @@
+#define M_PI 3.14159265358979323846
+
 #include <vector>
 #include <iostream>
 #include <string>
 #include <cmath>
 #include <SFML/Graphics.hpp>
 #include "Fps.cpp"
-#include "ObjFileParser.cpp"
-#include "PrimitiveModels/Pyramid.h"
-#include "PrimitiveModels/Cube.h"
-
-#define M_PI 3.14159265358979323846
+#include "Cube.h"
 
 using std::vector;
 using std::cout;
 using std::endl;
-using sf::Vector2f;
 
 /** 
     Do the rotation to the 3D points that's being passed in based on the dx, dy, and dz angles 
@@ -36,8 +33,6 @@ vector<int> projection(vector<int> vert, double k1, double k2, int width, int he
 
 
 int main() {
-    cout << "\nProgram Start.." << endl;
-
     // The width and height of the window
     const int width = 1000, height = 700;
     // The rotation rate at each axis in degrees, default is 0
@@ -46,26 +41,20 @@ int main() {
     double k2 = 800;
     // The distance between the object and the screen
     double k1 = 700;
-    // the framerate/update rate
-    int framerate = 144;
 
     sf::RenderWindow window(sf::VideoMode(width, height), "Bruh the window is showing stuff");
-    window.setFramerateLimit(framerate);
+    window.setFramerateLimit(144);
     FPS fps;
     
     Cube block;
-    // Pyramid block;
-
     // Get the verticies and the triangles from the cube
     vector<vector<int>> blockVert = block.getVert(); 
     vector<vector<int>> blockTri = block.getTri();
     vector<vector<int>> screenVert(blockVert.size(), vector<int> (2));
 
-    // The buff vertex array stores all the lines that we will be drawing, the reason 
-    // why we multiply by six is because we need 6 points to draw 3 lines
-    // sf::VertexArray* buff = new sf::VertexArray(sf::Lines, blockTri.size() * 6);
-    sf::VertexArray buff(sf::Lines, blockTri.size() * 6);
-        cout << "   buff vertex count " << buff.getVertexCount() << endl;
+    // The buff vertex array stores all the lines that we will be drawing, the reason why we multiply
+    // by six is because we need 6 points to draw 3 lines
+    sf::VertexArray* buff = new sf::VertexArray(sf::Lines, blockTri.size() * 6);
 
     // start the game loop
     while (window.isOpen()) {
@@ -74,65 +63,66 @@ int main() {
         sf::Event event;
         while (window.pollEvent(event)) {
             // check to close the window
-            if (event.type == sf::Event::Closed) { window.close(); }
+            if (event.type == sf::Event::Closed)
+                window.close();
         }
 
         // update the window's title to the current frame per second
         fps.update();
-        window.setTitle("Dude the window is showing stuff, Fps: " + std::to_string(fps.getFPS()));
-
+        window.setTitle("Dude the window is showing stuff, Fps: " 
+                        + std::to_string(fps.getFPS()));
+    
         // calculate the rotation and the projection of the 3D verticies, and store
-        // the 2D points in the screenVert vector
+        // the 2D points in a vector
         for (int i = 0; i < blockVert.size(); i++) {
             vector<int> temp = rotation(blockVert.at(i), rotX, rotY, rotZ);
             screenVert.at(i) = projection(temp, k1, k2, width, height);
-            // cout << "Coord: " << screenVert.at(i).at(0) << ", " << screenVert.at(i).at(1) << endl;
+            //std::cout << "Coord: " << screenVert.at(i).at(0) << ", " << screenVert.at(i).at(1) << std::endl;
         }
 
-            // debugging purpose
-            // cout << "   before putting verticies in buffer\n" << endl;
-            // cout << "   blockTri.size(): " << blockTri.size() << endl;
-            // cout << "   buff vertex count " << buff.getVertexCount() << endl;
-            // cout << "   ScreenVert size: " << screenVert.size() << endl;
-
-        // store the 2D verticies that we calculated from the previous rotation and projection calculation 
-        // into the buffer so the SFML knows what to draw. Use the blockTri that shows the vertices that 
-        // forms the triangles, we would need a total of 3 lines, or 6 points for each arragements 
-        // (point 1-2, 2-3, 3-1). And yes the order of which we insert the vertex object matters since the 
+        // store the verticies into the buffer using the blockTri that shows the vertices to use
+        // four triangles, we would need a total of 3 lines, or 6 points for each arragements 
+        // (point 1-2, 2-3, 1-3). And yes the order of which we insert the vertex object matters since the 
         // buffer uses it to connect the lines
         for (int i = 0; i < blockTri.size(); i++) {
-            // Calculated 2D vert, faces, face #, the vert # in the face, (0 = x, 1 = y)  
-            buff[0 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(0) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(0) - 1).at(1));
-            buff[1 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(1) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(1) - 1).at(1));
-
-            buff[2 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(1) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(1) - 1).at(1));
-            buff[3 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(2) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(2) - 1).at(1));
-
-            buff[4 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(2) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(2) - 1).at(1));
-            buff[5 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(1) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(1) - 1).at(1));                                           
+            // buff->append(sf::Vertex(sf::Vector2f(screenVert.at(i).at(0), screenVert.at(i).at(1))));
+            buff->append(sf::Vertex(sf::Vector2f(
+                    screenVert.at(blockTri.at(i).at(0)).at(0),
+                    screenVert.at(blockTri.at(i).at(0)).at(1)
+            )));
+            for (int j = 1; j < blockTri.at(i).size(); j++) {
+                buff->append(sf::Vertex(sf::Vector2f(
+                    screenVert.at(blockTri.at(i).at(j)).at(0),
+                    screenVert.at(blockTri.at(i).at(j)).at(1)
+                )));
+                buff->append(sf::Vertex(sf::Vector2f(
+                    screenVert.at(blockTri.at(i).at(j)).at(0),
+                    screenVert.at(blockTri.at(i).at(j)).at(1)
+                )));
+            }
+            buff->append(sf::Vertex(sf::Vector2f(
+                screenVert.at(blockTri.at(i).at(0)).at(0),
+                screenVert.at(blockTri.at(i).at(0)).at(1)
+            ))); 
         }
 
         // clear the window with black background
         window.clear(sf::Color::Black);
 
         // draw & display stuff
-        window.draw(buff);
+        window.draw(*buff);
         window.display();
+
+        // clear our buff
+        buff->clear();
 
         // Update the rotation angle
         rotX += 0.1;
         rotY += 0.3;
-        // rotZ += 0.3;
+        //rotZ += 0.3;
     }
 
-    buff.clear();
-    cout << "..Finished\n" << endl;
+    delete buff;
     return 0;
 }
 

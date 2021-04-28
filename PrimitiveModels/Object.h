@@ -14,8 +14,9 @@ class Object {
         // a function that can populate the verticies and 
         // triangles as the other class reads the .obj file
 
-        // Returns the verticies or the triangles
+        // returns the verticies of the object
         virtual vector<vector<int>> getVert() = 0;
+        // returns the triangles of the object
         virtual vector<vector<int>> getTri() = 0;
 
     protected: 

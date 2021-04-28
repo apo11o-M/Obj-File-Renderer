@@ -1,7 +1,15 @@
 all: compile link
 
-compile:
-	g++ -I src/include -c Fps.cpp Cube.cpp Main.cpp 
-link:
-	g++ Main.o Cube.o Fps.o -o main -L src/lib -l sfml-graphics -l sfml-window -l sfml-system
+test: compile link run
 
+compile:
+	g++ -I src/include -c Fps.cpp ObjFileParser.cpp PrimitiveModels/Cube.cpp PrimitiveModels/Pyramid.cpp Main.cpp 
+
+link:
+	g++ Main.o Fps.o ObjFileParser.o Cube.o Pyramid.o -o main -L src/lib -l sfml-graphics -l sfml-window -l sfml-system
+
+clean:
+	del *.o
+
+run: 
+	main.exe
