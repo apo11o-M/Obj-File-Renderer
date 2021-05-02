@@ -4,9 +4,11 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 #include "Fps.cpp"
-#include "ObjFileParser.cpp"
 #include "PrimitiveModels/Pyramid.h"
 #include "PrimitiveModels/Cube.h"
+#include "PrimitiveModels/ObjModel.h"
+#include "ObjFileParser.h"
+
 
 #define M_PI 3.14159265358979323846
 
@@ -53,13 +55,25 @@ int main() {
     window.setFramerateLimit(framerate);
     FPS fps;
     
-    Cube block;
+    
+    ObjModel block("cone.obj");
+
+    // Cube block;
     // Pyramid block;
 
     // Get the verticies and the triangles from the cube
     vector<vector<int>> blockVert = block.getVert(); 
     vector<vector<int>> blockTri = block.getTri();
     vector<vector<int>> screenVert(blockVert.size(), vector<int> (2));
+
+
+    cout << "Block Verticies: " << endl;
+    for (int i = 0; i < blockVert.size(); i++) {
+        for (int j = 0; j < blockVert.at(i).size(); j++) {
+            cout << blockVert.at(i).at(j) << " ";
+        }
+        cout << endl;
+    }
 
     // The buff vertex array stores all the lines that we will be drawing, the reason 
     // why we multiply by six is because we need 6 points to draw 3 lines

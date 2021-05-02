@@ -10,8 +10,6 @@
 class Pyramid : public Object {
     public:
         Pyramid();
-        vector<vector<int>> getVert() override { return verticies; }
-        vector<vector<int>> getTri() override { return faces; }
 
 };
 

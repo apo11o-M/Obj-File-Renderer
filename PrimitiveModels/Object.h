@@ -15,9 +15,9 @@ class Object {
         // triangles as the other class reads the .obj file
 
         // returns the verticies of the object
-        virtual vector<vector<int>> getVert() = 0;
+        vector<vector<int>> getVert() { return verticies; };
         // returns the triangles of the object
-        virtual vector<vector<int>> getTri() = 0;
+        vector<vector<int>> getTri() { return faces; };
 
     protected: 
         // The verticies 

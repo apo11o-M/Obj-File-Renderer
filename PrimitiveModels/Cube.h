@@ -10,9 +10,7 @@
 class Cube : public Object {
     public:
         Cube();
-        vector<vector<int>> getVert() override { return verticies; }
-        vector<vector<int>> getTri() override { return faces; }
-
+        
 };
 
 #endif
