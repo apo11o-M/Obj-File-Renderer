@@ -13,7 +13,6 @@ ObjModel::ObjModel() {}
 
 ObjModel::ObjModel(string filename) {
     ObjFileParser parser;
-        cout << "   in ObjModel.cpp" << endl;
     try{
         parser.parseObjFile(filename);
             cout << "Loading Obj File.." << endl;
@@ -22,6 +21,5 @@ ObjModel::ObjModel(string filename) {
     }
     verticies = parser.getVerticies();
     faces = parser.getFaces();
-
 }
 

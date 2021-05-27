@@ -4,9 +4,11 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 #include "Fps.cpp"
-#include "ObjFileParser.cpp"
 #include "PrimitiveModels/Pyramid.h"
 #include "PrimitiveModels/Cube.h"
+#include "PrimitiveModels/ObjModel.h"
+#include "ObjFileParser.h"
+
 
 #define M_PI 3.14159265358979323846
 
@@ -43,23 +45,46 @@ int main() {
     // The rotation rate at each axis in degrees, default is 0
     double rotX = 0, rotY = 0, rotZ = 0;
     // The distance between the object and the viewer
-    double k2 = 800;
+    double k2 = 800;    
     // The distance between the object and the screen
-    double k1 = 700;
+    double k1 = 700;    
     // the framerate/update rate
     int framerate = 144;
+    // whether or not pause the game
+    bool pause = false;
+    bool right = false, left = false, up = false, down = false;
 
-    sf::RenderWindow window(sf::VideoMode(width, height), "Bruh the window is showing stuff");
+    sf::RenderWindow window(sf::VideoMode(width, height), "yo the window is showing stuff");
     window.setFramerateLimit(framerate);
     FPS fps;
     
-    Cube block;
+
+    ObjModel block("ObjModelFiles/utah_teapot_noslash.obj");
+    // ObjModel block("ObjModelFiles/utah_teapot.obj");
+    // ObjModel block("cone.obj");
+    // Cube block;
     // Pyramid block;
 
     // Get the verticies and the triangles from the cube
+    
+    // The model's original verticies, should not be changed 
+    const vector<vector<int>> modelVert = block.getVert();
+    // The model's original triangles, should not be changed
+    const vector<vector<int>> modelTri = block.getTri();
+    // The buffer verticies for the block, represents the actual coord of the model in the 3d space 
     vector<vector<int>> blockVert = block.getVert(); 
+    // The buffer triangles for the block, represents the actual coord of the model in the 3d space 
     vector<vector<int>> blockTri = block.getTri();
+    // The buffer coordinates of the model on a 2D screen.
     vector<vector<int>> screenVert(blockVert.size(), vector<int> (2));
+
+    // cout << "Block Verticies: " << endl;
+    // for (int i = 0; i < blockVert.size(); i++) {
+    //     for (int j = 0; j < blockVert.at(i).size(); j++) {
+    //         cout << blockVert.at(i).at(j) << " ";
+    //     }
+    //     cout << endl;
+    // }
 
     // The buff vertex array stores all the lines that we will be drawing, the reason 
     // why we multiply by six is because we need 6 points to draw 3 lines
@@ -72,15 +97,27 @@ int main() {
         // Event handlers
         sf::Event event;
         while (window.pollEvent(event)) {
-            // check to close the window
-            if (event.type == sf::Event::Closed) { window.close(); }
+            switch (event.type) {
+                case (sf::Event::Closed):
+                    // check to close the window
+                    window.close();
+                    break;
+                case (sf::Event::KeyPressed):
+                    // check if keys are pressed
+                    if (event.key.code == sf::Keyboard::Space) { pause = !pause; }
+                    else if (event.key.code == sf::Keyboard::Up) {up = true;}
+                    else if (event.key.code == sf::Keyboard::Down) {down = true;}
+                    else if (event.key.code == sf::Keyboard::Left) {left = true;}
+                    else if (event.key.code == sf::Keyboard::Right) {right = true;}
+                    break;
+                default:
+                    break;
+            }
         }
 
         // update the window's title to the current frame per second
         fps.update();
-        window.setTitle("Dude the window is showing stuff, Fps: " + std::to_string(fps.getFPS()));
-
-
+        window.setTitle("yo the window is showing stuff, Fps: " + std::to_string(fps.getFPS()));
 
         // calculate the rotation and the projection of the 3D verticies, and store
         // the 2D points in the screenVert vector
@@ -88,19 +125,16 @@ int main() {
             vector<int> temp = rotation(blockVert.at(i), rotX, rotY, rotZ);
             screenVert.at(i) = projection(temp, k1, k2, width, height);
             // cout << "Coord: " << screenVert.at(i).at(0) << ", " << screenVert.at(i).at(1) << endl;
+                        // floating point errors?
+                        // blockVert.at(i) = rotation(blockVert.at(i), rotX, rotY, rotZ);
+                        // screenVert.at(i) = projection(blockVert.at(i), k1, k2, width, height);
         }
-
-            // debugging purpose
-            // cout << "   before putting verticies in buffer\n" << endl;
-            // cout << "   blockTri.size(): " << blockTri.size() << endl;
-            // cout << "   buff vertex count " << buff.getVertexCount() << endl;
-            // cout << "   ScreenVert size: " << screenVert.size() << endl;
 
         // store the 2D verticies that we calculated from the previous rotation and projection calculation 
         // into the buffer so the SFML knows what to draw. Use the blockTri that shows the vertices that 
         // forms the triangles, we would need a total of 3 lines, or 6 points for each arragements 
         // (point 1-2, 2-3, 3-1). And yes the order of which we insert the vertex object matters since the 
-        // buffer uses it to connect the lines
+        // buffer uses those points to connect the lines
         for (int i = 0; i < blockTri.size(); i++) {
             // Calculated 2D vert, faces, face #, the vert # in the face, (0 = x, 1 = y)  
             buff[0 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(0) - 1).at(0),
@@ -119,8 +153,6 @@ int main() {
                                                 (float)screenVert.at(blockTri.at(i).at(1) - 1).at(1));                                           
         }
 
-
-
         // clear the window with black background
         window.clear(sf::Color::Black);
 
@@ -129,9 +161,23 @@ int main() {
         window.display();
 
         // Update the rotation angle
-        rotX += 0.1;
-        rotY += 0.3;
-        // rotZ += 0.3;
+        if (!pause) {
+            rotX += 0.01;
+            rotY += 0.01;
+            // rotZ += 0.3;
+        } else if (up) {
+            rotX += 1;
+            up = false;
+        } else if (down) {
+            rotX -= 1;
+            down = false;
+        } else if (left) {
+            rotY -= 1;
+            left = false;
+        } else if (right) {
+            rotY += 1;
+            right = false;
+        }
     }
 
     buff.clear();

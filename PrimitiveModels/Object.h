@@ -30,6 +30,9 @@ class Object {
         // points together.
         vector<vector<int>> faces;
 
+        // The face normals
+        vector<vector<int>> normals;
+
 
 };
 
