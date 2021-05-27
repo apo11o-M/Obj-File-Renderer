@@ -1,9 +1,21 @@
 #include "Vec3d.h"
 
+Vec3d::Vec3d() {
+    x = 0;
+    y = 0;
+    z = 0;
+}
+
+Vec3d::Vec3d(const Vec3d& vec) {
+    x = vec.x;
+    y = vec.y;
+    z = vec.z;
+}
+
 Vec3d::Vec3d(double x, double y, double z) {
-    x = this->x;
-    y = this->y;
-    z = this->z;
+    this->x = x;
+    this->y = y;
+    this->z = z;
 }
 
 Vec3d::Vec3d(vector<int> vec) {
@@ -12,16 +24,4 @@ Vec3d::Vec3d(vector<int> vec) {
         y = vec.at(1);
         z = vec.at(2);
     }
-}
-
-double Vec3d::getX() {
-    return x;
-}
-
-double Vec3d::getY() {
-    return y;
-}
-
-double Vec3d::getZ() {
-    return z;
 }

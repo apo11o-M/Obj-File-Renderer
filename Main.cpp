@@ -8,6 +8,8 @@
 #include "PrimitiveModels/Cube.h"
 #include "PrimitiveModels/ObjModel.h"
 #include "ObjFileParser.h"
+#include "Vec2d.h"
+#include "Vec3d.h"
 
 
 #define M_PI 3.14159265358979323846
@@ -23,7 +25,7 @@ using sf::Vector2f;
     @param rot Amount of rotation angle on each axis
     @return The rotated 3D points
 */ 
-vector<int> rotation(vector<int> vert, double rotX, double rotY, double rotZ);
+Vec3d rotation(Vec3d vert, double rotX, double rotY, double rotZ);
 
 /** 
     Do the projection that converts the passed in 3D points to the 2D points that will be 
@@ -34,7 +36,7 @@ vector<int> rotation(vector<int> vert, double rotX, double rotY, double rotZ);
     @param distOV Object & viewer distance
     @return The projected 2D points onto the screen
 */
-vector<int> projection(vector<int> vert, double k1, double k2, int width, int height);
+Vec2d projection(Vec3d vert, double k1, double k2, int width, int height);
 
 
 int main() {
@@ -45,9 +47,9 @@ int main() {
     // The rotation rate at each axis in degrees, default is 0
     double rotX = 0, rotY = 0, rotZ = 0;
     // The distance between the object and the viewer
-    double k2 = 800;    
+    double k2 = 800.0;    
     // The distance between the object and the screen
-    double k1 = 700;    
+    double k1 = 700.0;    
     // the framerate/update rate
     int framerate = 144;
     // whether or not pause the game
@@ -68,23 +70,25 @@ int main() {
     // Get the verticies and the triangles from the cube
     
     // The model's original verticies, should not be changed 
-    const vector<vector<int>> modelVert = block.getVert();
+    const vector<Vec3d> modelVert = block.getVert();
     // The model's original triangles, should not be changed
-    const vector<vector<int>> modelTri = block.getTri();
+    const vector<Vec3d> modelTri = block.getTri();
     // The buffer verticies for the block, represents the actual coord of the model in the 3d space 
-    vector<vector<int>> blockVert = block.getVert(); 
+    vector<Vec3d> blockVert = block.getVert(); 
     // The buffer triangles for the block, represents the actual coord of the model in the 3d space 
-    vector<vector<int>> blockTri = block.getTri();
+    vector<Vec3d> blockTri = block.getTri();
     // The buffer coordinates of the model on a 2D screen.
-    vector<vector<int>> screenVert(blockVert.size(), vector<int> (2));
-
-    // cout << "Block Verticies: " << endl;
-    // for (int i = 0; i < blockVert.size(); i++) {
-    //     for (int j = 0; j < blockVert.at(i).size(); j++) {
-    //         cout << blockVert.at(i).at(j) << " ";
-    //     }
-    //     cout << endl;
-    // }
+    vector<Vec2d> screenVert(blockVert.size(), Vec2d());
+    
+    cout << "Block Verticies: " << endl;
+    for (int i = 0; i < blockVert.size(); i++) {
+        for (int j = 0; j < 3; j++) {
+            cout << blockVert.at(i).x << " "
+                 << blockVert.at(i).y << " "
+                 << blockVert.at(i).z << " " << endl;
+        }
+        cout << endl;
+    }
 
     // The buff vertex array stores all the lines that we will be drawing, the reason 
     // why we multiply by six is because we need 6 points to draw 3 lines
@@ -122,7 +126,7 @@ int main() {
         // calculate the rotation and the projection of the 3D verticies, and store
         // the 2D points in the screenVert vector
         for (int i = 0; i < blockVert.size(); i++) {
-            vector<int> temp = rotation(blockVert.at(i), rotX, rotY, rotZ);
+            Vec3d temp = rotation(blockVert.at(i), rotX, rotY, rotZ);
             screenVert.at(i) = projection(temp, k1, k2, width, height);
             // cout << "Coord: " << screenVert.at(i).at(0) << ", " << screenVert.at(i).at(1) << endl;
                         // floating point errors?
@@ -137,20 +141,20 @@ int main() {
         // buffer uses those points to connect the lines
         for (int i = 0; i < blockTri.size(); i++) {
             // Calculated 2D vert, faces, face #, the vert # in the face, (0 = x, 1 = y)  
-            buff[0 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(0) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(0) - 1).at(1));
-            buff[1 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(1) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(1) - 1).at(1));
+            buff[0 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).x - 1).x,
+                                                (float)screenVert.at(blockTri.at(i).x - 1).y);
+            buff[1 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).y - 1).x,
+                                                (float)screenVert.at(blockTri.at(i).y - 1).y);
 
-            buff[2 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(1) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(1) - 1).at(1));
-            buff[3 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(2) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(2) - 1).at(1));
+            buff[2 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).y - 1).x,
+                                                (float)screenVert.at(blockTri.at(i).y - 1).y);
+            buff[3 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).z - 1).x,
+                                                (float)screenVert.at(blockTri.at(i).z - 1).y);
 
-            buff[4 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(2) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(2) - 1).at(1));
-            buff[5 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).at(1) - 1).at(0),
-                                                (float)screenVert.at(blockTri.at(i).at(1) - 1).at(1));                                           
+            buff[4 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).z - 1).x,
+                                                (float)screenVert.at(blockTri.at(i).z - 1).y);
+            buff[5 + i * 6].position = Vector2f((float)screenVert.at(blockTri.at(i).y - 1).x,
+                                                (float)screenVert.at(blockTri.at(i).y - 1).y);                                           
         }
 
         // clear the window with black background
@@ -162,8 +166,8 @@ int main() {
 
         // Update the rotation angle
         if (!pause) {
-            rotX += 0.01;
-            rotY += 0.01;
+            rotX += 0.1;
+            rotY += 0.3;
             // rotZ += 0.3;
         } else if (up) {
             rotX += 1;
@@ -185,30 +189,29 @@ int main() {
     return 0;
 }
 
-vector<int> rotation(vector<int> vert, double rotX, double rotY, double rotZ) {
-    vector<int> result = {0, 0, 0};
-    int x = vert.at(0), y = vert.at(1), z = vert.at(2);
-    rotX *= M_PI / 180;
-    rotY *= M_PI / 180;
-    rotZ *= M_PI / 180;
+Vec3d rotation(Vec3d vert, double rotX, double rotY, double rotZ) {
+    Vec3d result;
+    int x = vert.x, y = vert.y, z = vert.z;
+    rotX *= M_PI / 180.0;
+    rotY *= M_PI / 180.0;
+    rotZ *= M_PI / 180.0;
     double sRotX = std::sin(rotX), sRotY = std::sin(rotY), sRotZ = std::sin(rotZ);
     double cRotX = std::cos(rotX), cRotY = std::cos(rotY), cRotZ = std::cos(rotZ);
 
-    result.at(0) = (x * cRotX * cRotY) + (y * sRotX * cRotY) - (z * sRotY);
-    result.at(1) = (x * (cRotX * sRotY * sRotZ - sRotX * cRotZ)) + (y * (sRotX * sRotY * sRotZ + cRotX * cRotZ))
+    result.x = (x * cRotX * cRotY) + (y * sRotX * cRotY) - (z * sRotY);
+    result.y = (x * (cRotX * sRotY * sRotZ - sRotX * cRotZ)) + (y * (sRotX * sRotY * sRotZ + cRotX * cRotZ))
                     + (z * cRotY * sRotZ);
-    result.at(2) = (x * (cRotX * sRotY * cRotZ + sRotX * sRotZ)) + (y * (sRotX * sRotY * cRotZ + cRotX * sRotZ))
+    result.z = (x * (cRotX * sRotY * cRotZ + sRotX * sRotZ)) + (y * (sRotX * sRotY * cRotZ + cRotX * sRotZ))
                     + (z * cRotY * cRotZ);
-
     return result;
 }
 
-vector<int> projection(vector<int> vert, double k1, double k2, int width, int height) {
-    vector<int> result(2, -1);
-    int x = vert.at(0), y = vert.at(1), z = vert.at(2);
+Vec2d projection(Vec3d vert, double k1, double k2, int width, int height) {
+    Vec2d result;
+    int x = vert.x, y = vert.y, z = vert.z;
 
-    result.at(0) = (k1 * x / (k2 + z)) + width / 2;
-    result.at(1) = (k1 * y / (k2 + z)) + height / 2;
+    result.x = (k1 * x / (k2 + z)) + width / 2;
+    result.y = (k1 * y / (k2 + z)) + height / 2;
 
     // The 2D coordinates in the buffer is centered in the top left corner of the window
     // since the coordinate system in sfml window has the orgin in the top left. We have

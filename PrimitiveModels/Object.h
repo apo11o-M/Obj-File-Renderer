@@ -7,6 +7,9 @@
 #define OBJECT_H
 
 #include <vector>
+#include "../Vec3d.h"
+#include "../Vec2d.h"
+
 using std::vector;
 
 class Object {
@@ -15,23 +18,23 @@ class Object {
         // triangles as the other class reads the .obj file
 
         // returns the verticies of the object
-        vector<vector<int>> getVert() { return verticies; };
+        vector<Vec3d> getVert() { return verticies; };
         // returns the triangles of the object
-        vector<vector<int>> getTri() { return faces; };
+        vector<Vec3d> getTri() { return faces; };
 
     protected: 
         // The verticies 
         // This contains the individual verticies of the model in a three 
         // dimensional space.
-        vector<vector<int>> verticies;
+        vector<Vec3d> verticies;
         
         // The triangles (faces)
         // This defines the triangle that forms when connecting the three 
         // points together.
-        vector<vector<int>> faces;
+        vector<Vec3d> faces;
 
         // The face normals
-        vector<vector<int>> normals;
+        vector<Vec3d> normals;
 
 
 };

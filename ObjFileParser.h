@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "Vec3d.h"
 
 using std::vector;
 using std::string;
@@ -12,12 +13,12 @@ class ObjFileParser {
     public:
         ObjFileParser();
         void parseObjFile(string filename);
-        vector<vector<int>> getVerticies() { return verticies; }
-        vector<vector<int>> getFaces() { return faces; }
+        vector<Vec3d> getVerticies() { return verticies; }
+        vector<Vec3d> getFaces() { return faces; }
 
     private:
-        vector<vector<int>> verticies;
-        vector<vector<int>> faces;
+        vector<Vec3d> verticies;
+        vector<Vec3d> faces;
 
 };
 

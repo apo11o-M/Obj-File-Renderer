@@ -3,18 +3,19 @@
 
 #include <vector>
 
-using namespace std;
+using std::vector;
 
 class Vec2d {
-    private:
+    public:
         double x;
         double y;
 
     public:
+        Vec2d();
+        Vec2d(const Vec2d& vec);
         Vec2d(double x, double y);
         Vec2d(vector<int> vec);
-        double getX();
-        double getY();
+
 
 };
 

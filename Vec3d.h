@@ -3,20 +3,20 @@
 
 #include <vector>
 
-using namespace std;
+using std::vector;
 
 class Vec3d {
-    private:
+    public:
         double x;
         double y;
         double z;
 
     public:
+        Vec3d();
+        Vec3d(const Vec3d& vec);
         Vec3d(double x, double y, double z);
         Vec3d(vector<int> vec);
-        double getX();
-        double getY();
-        double getZ();
+
 
 };
 

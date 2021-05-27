@@ -1,8 +1,18 @@
 #include "Vec2d.h"
 
+Vec2d::Vec2d() {
+    x = 0;
+    y = 0;
+}
+
+Vec2d::Vec2d(const Vec2d& vec) {
+    x = vec.x;
+    y = vec.y;
+}
+
 Vec2d::Vec2d(double x, double y) {
-    x = this->x;
-    y = this->y;
+    this->y = y;
+    this->x = x;
 }
 
 Vec2d::Vec2d(vector<int> vec) {
@@ -10,12 +20,4 @@ Vec2d::Vec2d(vector<int> vec) {
         x = vec.at(0);
         y = vec.at(1);
     }
-}
-
-double Vec2d::getX() {
-    return x;
-}
-
-double Vec2d::getY() {
-    return y;
 }

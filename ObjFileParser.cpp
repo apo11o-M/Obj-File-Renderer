@@ -34,7 +34,7 @@ void ObjFileParser::parseObjFile(string filename) {
                     i++;
                 }
             }
-            verticies.push_back(vecSingle);
+            verticies.push_back(Vec3d(vecSingle));
 
         } else if (!line.empty() && line.at(0) == 'f' && line.at(1) == ' ') {
             stringstream sstr(line);
@@ -47,7 +47,7 @@ void ObjFileParser::parseObjFile(string filename) {
                     i++;
                 }
             }
-            faces.push_back(faceSingle);
+            faces.push_back(Vec3d(faceSingle));
         }
     } 
 
