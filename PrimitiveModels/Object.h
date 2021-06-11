@@ -9,33 +9,48 @@
 #include <vector>
 #include "../Vec3d.h"
 #include "../Vec2d.h"
+#include "Faces.h"
 
 using std::vector;
 
 class Object {
     public:
-        // a function that can populate the verticies and 
+        // a function that can populate the vertices and 
         // triangles as the other class reads the .obj file
 
-        // returns the verticies of the object
-        vector<Vec3d> getVert() { return verticies; };
-        // returns the triangles of the object
-        vector<Vec3d> getTri() { return faces; };
+        // returns the vertices of the object
+        vector<Vec3d> getVert() { return vertices; }
+        // returns the faces of the object
+        vector<Faces> getTri() { return faces; }
+        // returns the vertex normals of the object
+        vector<Vec3d> getVertNorm() { return vertNorm; }
+        // returns the face normals of the object
+        vector<Vec3d> getSurfNorm() { return surfNorm; }
+        // returns the texture normal of the object
+        vector<Vec3d> getTextNorm() { return textNorm; }
 
     protected: 
-        // The verticies 
-        // This contains the individual verticies of the model in a three 
+        // The vertices {x, y, z}
+        // This contains the individual vertices of the model in a three 
         // dimensional space.
-        vector<Vec3d> verticies;
+        vector<Vec3d> vertices;
         
-        // The triangles (faces)
-        // This defines the triangle that forms when connecting the three 
-        // points together.
-        vector<Vec3d> faces;
+        // The vertex normals {x, y, z}
+        vector<Vec3d> vertNorm;
 
-        // The face normals
-        vector<Vec3d> normals;
+        /** The triangles (faces). 
+        `   Each faces have three Vec3ds, representing the vertices, 
+            and each vertices contains its coords number, vertex normal number, and texture normal
+            number.
+        */
+        vector<Faces> faces;
 
+        // The surface normals {x, y, z}
+        // calculated from the vertex normals
+        vector<Vec3d> surfNorm;
+
+        // The texture normals {x, y, z}
+        vector<Vec3d> textNorm;
 
 };
 

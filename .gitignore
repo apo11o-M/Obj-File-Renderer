@@ -4,3 +4,4 @@
 
 # C++ files
 *.o
+*.dll

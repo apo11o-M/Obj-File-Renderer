@@ -20,51 +20,70 @@ void ObjFileParser::parseObjFile(string filename) {
     }
 
     // start getline and and do stuff
-    vector<int> vecSingle(3), faceSingle(3);
-    string line, temp, result;
+    vector<double> vecSingle(3);
+    vector<int> faceSingle(9);
+    string line, face, vert;
     int i = 0;
     while (getline(myFile, line)) {
         i = 0;
-        if (!line.empty() && line.at(0) == 'v' && line.at(1) == ' ') {
-            stringstream sstr(line);
-            while (sstr.good()) {
-                getline(sstr, result, ' ');
-                if (result != "v") {
-                    vecSingle.at(i) = stod(result) * 50;
-                    i++;
+        if (!line.empty()) {
+            if (line.at(0) == 'v' && line.at(1) == ' ') {
+                // this line is a vertex
+                stringstream check1(line);
+                while (getline(check1, vert, ' ')) {
+                    if (vert != "v") {
+                        // vecSingle.at(i) = stod(vert) * 50;
+                        vecSingle.at(i) = stod(vert);
+                        i++;
+                    }
                 }
-            }
-            verticies.push_back(Vec3d(vecSingle));
+                vertices.push_back(Vec3d(vecSingle));
 
-        } else if (!line.empty() && line.at(0) == 'f' && line.at(1) == ' ') {
-            stringstream sstr(line);
-            while (sstr.good()) {
-                getline(sstr, temp, ' ');
-                if (temp != "f") {
-                    stringstream item(temp);
-                    getline(item, result, '/');
-                    faceSingle.at(i) = stod(result);
-                    i++;
+            } else if (line.at(0) == 'v' && line.at(1) == 'n' && line.at(2) == ' ') { 
+                // this line is a vertex normal
+                stringstream check1(line);
+                while (getline(check1, vert, ' ')) {
+                    if (vert != "vn") {
+                        vecSingle.at(i) = stod(vert);
+                        i++;
+                    }
                 }
+                vertNorm.push_back(Vec3d(vecSingle));
+
+            } else if (line.at(0) == 'v' && line.at(1) == 't' && line.at(2) == ' ') { 
+                // this line is a texture normal 
+                vecSingle = {0, 0, 0};
+                stringstream check1(line);
+                while (getline(check1, vert, ' ')) {
+                    if (vert != "vt") {
+                        vecSingle.at(i) = stod(vert);
+                        i++;
+                    }
+                }
+                textNorm.push_back(Vec3d(vecSingle));  
+
+            } else if (line.at(0) == 'f' && line.at(1) == ' ') {
+                stringstream check1(line);
+                while (getline(check1, face, ' ')) {
+                    stringstream check2(face);
+                    while (getline(check2, vert, '/') && vert != "f") {
+                        if (!vert.empty()) {
+                            faceSingle.at(i) = stod(vert) - 1;
+                        } else {
+                            faceSingle.at(i) = 0;
+                        }
+                        i++;
+                    }
+                }
+                Vec3d v1(faceSingle.at(0), faceSingle.at(1), faceSingle.at(2));
+                Vec3d v2(faceSingle.at(3), faceSingle.at(4), faceSingle.at(5));
+                Vec3d v3(faceSingle.at(6), faceSingle.at(7), faceSingle.at(8));
+                faces.push_back(Faces(v1, v2, v3));
+            
             }
-            faces.push_back(Vec3d(faceSingle));
         }
+        
     } 
 
-    // cout << "   verticies" << endl;
-    // for (int j = 0; j < verticies.size(); j++) {
-    //     for (int k = 0; k < verticies.at(j).size(); k++) {
-    //         cout << verticies.at(j).at(k) << " ";
-    //     }
-    //     cout << "\n";
-    // }
-
-    // cout << "   faces" << endl;
-    // for (int j = 0; j < faces.size(); j++) {
-    //     for (int k = 0; k < faces.at(j).size(); k++) {
-    //         cout << faces.at(j).at(k) << " ";
-    //     }
-    //     cout << "\n";
-    // }
 
 }

@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "Vec3d.h"
+#include "PrimitiveModels/Faces.h"
 
 using std::vector;
 using std::string;
@@ -13,12 +14,16 @@ class ObjFileParser {
     public:
         ObjFileParser();
         void parseObjFile(string filename);
-        vector<Vec3d> getVerticies() { return verticies; }
-        vector<Vec3d> getFaces() { return faces; }
+        vector<Vec3d> getVertices() { return vertices; }
+        vector<Faces> getFaces() { return faces; }
+        vector<Vec3d> getVertNorm() { return vertNorm; }
+        vector<Vec3d> getTextNorm() { return textNorm; }
 
     private:
-        vector<Vec3d> verticies;
-        vector<Vec3d> faces;
+        vector<Vec3d> vertices;
+        vector<Faces> faces;
+        vector<Vec3d> vertNorm;
+        vector<Vec3d> textNorm;
 
 };
 
