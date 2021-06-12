@@ -26,6 +26,8 @@ class Object {
         vector<Vec3d> getVertNorm() { return vertNorm; }
         // returns the face normals of the object
         vector<Vec3d> getSurfNorm() { return surfNorm; }
+        // returns the face normals' position of the object
+        vector<Vec3d> getSurfNormPos() { return surfNormPos; }
         // returns the texture normal of the object
         vector<Vec3d> getTextNorm() { return textNorm; }
 
@@ -48,6 +50,10 @@ class Object {
         // The surface normals {x, y, z}
         // calculated from the vertex normals
         vector<Vec3d> surfNorm;
+
+        // The position of the surface normals {x, y, z}
+        // calculated from the centroid of the face triangles 
+        vector<Vec3d> surfNormPos;
 
         // The texture normals {x, y, z}
         vector<Vec3d> textNorm;

@@ -23,6 +23,13 @@ class Faces {
             vert2 = vec2;
             vert3 = vec3;
         }
+        friend ostream& operator<<(ostream& os, const Faces& f) {
+            os << "f " << f.vert1.x << "/" << f.vert1.y << "/" << f.vert1.z 
+               << " " << f.vert2.x << "/" << f.vert2.y << "/" << f.vert2.z
+               << " " << f.vert3.x << "/" << f.vert3.y << "/" << f.vert3.z << endl;
+            return os;  
+        }
+
 
 };
 

@@ -25,6 +25,7 @@ class ObjModel : public Object {
             @return The surface normal
         */
         Vec3d calcSurfNormB(Vec3d& triangle);
+
 };
 
 #endif

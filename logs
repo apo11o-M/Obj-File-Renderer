@@ -1,0 +1,71 @@
+centroid:(0, 1, 0)
+temp: (0, -1, -800)
+x
+dot product: -1
+blockTri.at(i): f 4/0/0 2/1/0 0/2/0
+
+centroid:(0, 0, 1)
+temp: (0, 0, -801)
+x
+dot product: -801
+blockTri.at(i): f 2/1/1 7/3/1 3/4/1
+
+centroid:(-1, 0, 0)
+temp: (1, 0, -800)
+x
+dot product: -1
+blockTri.at(i): f 6/5/2 5/6/2 7/7/2
+
+centroid:(0, -1, 0)
+temp: (0, 1, -800)
+x
+dot product: -1
+blockTri.at(i): f 1/8/3 7/9/3 5/10/3
+
+centroid:(1, 0, 0)
+temp: (-1, 0, -800)
+x
+dot product: -1
+blockTri.at(i): f 0/2/4 3/4/4 1/8/4
+
+    centroid:(0, 0, -1)
+    temp: (0, 0, -799)
+    v
+    dot product: 799
+    blockTri.at(i): f 4/11/5 1/8/5 5/6/5
+
+centroid:(0, 1, 0)
+temp: (0, -1, -800)
+x
+dot product: -1
+blockTri.at(i): f 4/0/0 6/12/0 2/1/0
+
+centroid:(0, 0, 1)
+temp: (0, 0, -801)
+x
+dot product: -801
+blockTri.at(i): f 2/1/1 6/13/1 7/3/1
+
+centroid:(-1, 0, 0)
+temp: (1, 0, -800)
+x
+dot product: -1
+blockTri.at(i): f 6/5/2 4/11/2 5/6/2
+
+centroid:(0, -1, 0)
+temp: (0, 1, -800)
+x
+dot product: -1
+blockTri.at(i): f 1/8/3 3/4/3 7/9/3
+
+centroid:(1, 0, 0)
+temp: (-1, 0, -800)
+x
+dot product: -1
+blockTri.at(i): f 0/2/4 2/1/4 3/4/4
+
+    centroid:(0, 0, -1)
+    temp: (0, 0, -799)
+    v
+    dot product: 799
+    blockTri.at(i): f 4/11/5 0/2/5 1/8/5

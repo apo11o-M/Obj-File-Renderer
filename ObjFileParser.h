@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include "Vec3d.h"
-#include "PrimitiveModels/Faces.h"
+#include "3DModels/Faces.h"
 
 using std::vector;
 using std::string;

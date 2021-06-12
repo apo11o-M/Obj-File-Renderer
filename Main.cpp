@@ -4,10 +4,10 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 #include "Fps.cpp"
-#include "PrimitiveModels/Pyramid.h"
-#include "PrimitiveModels/Cube.h"
-#include "PrimitiveModels/ObjModel.h"
-#include "PrimitiveModels/Faces.h"
+#include "3DModels/Pyramid.h"
+#include "3DModels/Cube.h"
+#include "3DModels/ObjModel.h"
+#include "3DModels/Faces.h"
 #include "ObjFileParser.h"
 #include "Vec2d.h"
 #include "Vec3d.h"
@@ -44,29 +44,28 @@ int main() {
     window.setFramerateLimit(framerate);
     FPS fps;
     
-    // ObjModel block("ObjModelFiles/default_cube.obj");
-    ObjModel block("ObjModelFiles/cone.obj");
-    // ObjModel block("ObjModelFiles/utah_teapot_resized.obj");
+    // ObjModel block("ObjFiles/default_cube.obj");
+    // ObjModel block("ObjFiles/cone.obj");
+    ObjModel block("ObjFiles/sphere.obj");
+    // ObjModel block("ObjFiles/utah_teapot_resized.obj");
 
-    // // The model's original vertices, should not be changed 
-    // const vector<Vec3d> modelVert = block.getVert();
-    // // The model's original triangles, should not be changed
-    // const vector<Faces> modelTri = block.getTri();
-    // // The model's original triangles, should not be changed
-    // const vector<Vec3d> modelSurfNorm = block.getSurfNorm();
 
-    // The buffer vertices for the block, represents the actual coord of the model in the 3d space 
+    // The model's original vertices, represents the actual coord of the model in the 3d space 
     vector<Vec3d> blockVert = block.getVert(); 
-    // The buffer triangles for the block, represents the actual coord of the model in the 3d space 
+    // The model's original triangles, represents the actual coord of the model in the 3d space 
     vector<Faces> blockTri = block.getTri();
-    // The model's surface normals
+    // The model's surface normal vectors
     vector<Vec3d> blockSurfNorm = block.getSurfNorm();     
+    // The model's surface normals' positions
+    vector<Vec3d> blockSurfNormPos = block.getSurfNormPos();
     
     // The buffer vertices for the block
-    vector<Vec3d> newVert = block.getVert();
+    vector<Vec3d> vertices = block.getVert();
     // The buffer surface normals for the block
-    vector<Vec3d> newSurfNorm = block.getSurfNorm();
-    // The final verticies that are facing the camera for transfering from 3d to 2d
+    vector<Vec3d> surfNorm = block.getSurfNorm();
+    // The buffer position of the surfNorm vertices
+    vector<Vec3d> surfNormPos = block.getSurfNormPos();
+    // The final buffer verticies that are facing the camera for transfering from 3d to 2d
     vector<Vec3d> facingCamVerts;
 
     // The buffer coordinates of the model on a 2D screen.
@@ -107,24 +106,31 @@ int main() {
         fps.update();
         window.setTitle("yo the window is showing stuff, Fps: " + std::to_string(fps.getFPS()));
 
-        // calculate the rotation for each surface normals
-        for (int i = 0; i < blockSurfNorm.size(); i++) {
-            newSurfNorm.at(i) = blockSurfNorm.at(i).rotation(rotX, rotY, rotZ);
-        }
-
         // calculate the rotation for each vertices
         for (int i = 0; i < blockVert.size(); i++) {
-            newVert.at(i) = blockVert.at(i).rotation(rotX, rotY, rotZ);
+            vertices.at(i) = blockVert.at(i).rotation(rotX, rotY, rotZ);
+        }
+
+        // calculate the rotation for each surface normals
+        for (int i = 0; i < blockSurfNorm.size(); i++) {
+            surfNorm.at(i) = blockSurfNorm.at(i).rotation(rotX, rotY, rotZ);
+        }
+
+        // calculate the rotation for each surface normal's position
+        for (int i = 0; i < blockSurfNormPos.size(); i++) {
+            surfNormPos.at(i) = blockSurfNormPos.at(i).rotation(rotX, rotY, rotZ);
         }
 
         // calculate the facing of those faces, if a face is facing towards us, add its verticies
         // to the array to calculate the projection
         for (int i = 0; i < blockTri.size(); i++) {
-            double dotProduct = newSurfNorm.at(i).dot(camCord);
+            Vec3d centroid = surfNormPos.at(i);
+            Vec3d temp = camCord - centroid;
+            double dotProduct = surfNorm.at(i).dot(temp);
             if (dotProduct > 0) {
-                facingCamVerts.push_back(newVert.at(blockTri.at(i).vert1.x));
-                facingCamVerts.push_back(newVert.at(blockTri.at(i).vert2.x));
-                facingCamVerts.push_back(newVert.at(blockTri.at(i).vert3.x));
+                facingCamVerts.push_back(vertices.at(blockTri.at(i).vert1.x));
+                facingCamVerts.push_back(vertices.at(blockTri.at(i).vert2.x));
+                facingCamVerts.push_back(vertices.at(blockTri.at(i).vert3.x));
             }
         }
         
@@ -132,13 +138,13 @@ int main() {
         for (int i = 0; i < facingCamVerts.size(); i++) {
             screenVert.push_back(facingCamVerts.at(i).projection(k1, k2, width, height));
         }
-        
+
         // store the 2D verticies that we calculated from the previous rotation and projection 
         // calculation into the buffer so the SFML knows what to draw. Use the blockTri that shows
         // the vertices that forms the triangles, we would need a total of 3 lines, or 6 points 
         // for each arragements (point 1-2, 2-3, 3-1). And yes the order of which we insert the 
         // vertex object matters since the buffer uses those points to connect the lines
-        for (int i = 0; (i + 3) < screenVert.size(); i += 3) {
+        for (int i = 0; (i + 2) < screenVert.size(); i += 3) {
             buff.append(Vector2f(static_cast<float>(screenVert.at(i).x), 
                                  static_cast<float>(screenVert.at(i).y)));
             buff.append(Vector2f(static_cast<float>(screenVert.at(i + 1).x), 
