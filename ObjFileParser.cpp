@@ -19,7 +19,7 @@ void ObjFileParser::parseObjFile(string filename) {
         throw std::runtime_error("The file does not exist you donkey.");
     }
 
-    // start getline and and do stuff
+    // start getline and do stuff
     vector<double> vecSingle(3);
     vector<int> faceSingle(9);
     string line, face, vert;
@@ -32,7 +32,7 @@ void ObjFileParser::parseObjFile(string filename) {
                 stringstream check1(line);
                 while (getline(check1, vert, ' ')) {
                     if (vert != "v") {
-                        vecSingle.at(i) = stod(vert) * 1.5;
+                        vecSingle.at(i) = stod(vert) * 2;
                         // vecSingle.at(i) = stod(vert);
                         i++;
                     }
