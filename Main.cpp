@@ -14,12 +14,15 @@
 
 #define M_PI 3.14159265358979323846
 
-using sf::Vector2f;
 using std::cout;
 using std::endl;
 using std::vector;
+using sf::Color;
+using sf::Vector2f;
 
-void bufferFill();
+void quickSort(vector<Vec3d> &arr, vector<Faces> &target, int low, int high, Vec3d &camPos);
+int partition(vector<Vec3d> &arr, vector<Faces> &target, int low, int high, Vec3d &camPos);
+void swap(Vec3d &a, Vec3d &b);
 
 int main() {
     cout << "\nProgram Start.." << endl;
@@ -43,7 +46,7 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(width, height), "yo the window is showing stuff");
     window.setFramerateLimit(framerate);
     FPS fps;
-
+    
     // ObjModel block("ObjFiles/default_cube.obj");
     // ObjModel block("ObjFiles/cone.obj");
     // ObjModel block("ObjFiles/sphere.obj");
@@ -66,18 +69,20 @@ int main() {
     vector<Vec3d> surfNorm = block.getSurfNorm();
     // The buffer position of the surfNorm vertices
     vector<Vec3d> surfNormPos = block.getSurfNormPos();
+    // The triangle that faces the camera, will sort from the furthest to the cloest to the camera
+    vector<Faces> facingCamTri;
     // The final buffer verticies that are facing the camera for transfering from 3d to 2d
     vector<Vec3d> facingCamVerts;
+    // The position of the surfNorm vertices that are facing the camera
+    vector<Vec3d> facingSurfNormPos;
 
     // The buffer coordinates of the model on a 2D screen.
-    // vector<Vec2d> screenVert(blockVert.size(), Vec2d());
     vector<Vec2d> screenVert;
-    screenVert.reserve(blockVert.size());
 
-    // The buff vertex array stores all the lines that we will be drawing, the reason
-    // why we multiply by six is because we need 6 points to draw 3 lines
-    // sf::VertexArray buff(sf::Lines, blockTri.size() * 6);
-    sf::VertexArray buff(sf::Lines, 0);
+    // The buff vertex array stores all the lines that we will be drawing
+    sf::VertexArray buffLine(sf::Lines, 0);
+    sf::VertexArray buffTri(sf::Triangles, 0);
+
 
     // start the game loop
     while (window.isOpen()) {
@@ -86,17 +91,21 @@ int main() {
         while (window.pollEvent(event)) {
             switch (event.type) {
             case (sf::Event::Closed):
-                // check to close the window
                 window.close();
                 break;
             case (sf::Event::KeyPressed):
-                // check if keys are pressed
                 if (event.key.code == sf::Keyboard::Space) { pause = !pause; }
                 else if (event.key.code == sf::Keyboard::Up) { up = true; }
                 else if (event.key.code == sf::Keyboard::Down) { down = true; }
                 else if (event.key.code == sf::Keyboard::Left) { left = true; }
                 else if (event.key.code == sf::Keyboard::Right) { right = true; }
+                else if (event.key.code == sf::Keyboard::Escape) { window.close(); }
                 break;
+            case (sf::Event::KeyReleased):
+                if (event.key.code == sf::Keyboard::Up) { up = false; }
+                else if (event.key.code == sf::Keyboard::Down) { down = false; }
+                else if (event.key.code == sf::Keyboard::Left) { left = false; }
+                else if (event.key.code == sf::Keyboard::Right) { right = false; }
             default:
                 break;
             }
@@ -110,17 +119,14 @@ int main() {
         for (int i = 0; i < blockVert.size(); i++) {
             vertices.at(i) = blockVert.at(i).rotation(rotX, rotY, rotZ);
         }
-
         // calculate the rotation for each surface normals
         for (int i = 0; i < blockSurfNorm.size(); i++) {
             surfNorm.at(i) = blockSurfNorm.at(i).rotation(rotX, rotY, rotZ);
         }
-
         // calculate the rotation for each surface normal's position
         for (int i = 0; i < blockSurfNormPos.size(); i++) {
             surfNormPos.at(i) = blockSurfNormPos.at(i).rotation(rotX, rotY, rotZ);
         }
-
         // calculate the facing of those faces, if a face is facing towards us, add its verticies
         // to the array to calculate the projection
         for (int i = 0; i < blockTri.size(); i++) {
@@ -128,12 +134,22 @@ int main() {
             Vec3d temp = camCord - centroid;
             double dotProduct = surfNorm.at(i).dot(temp);
             if (dotProduct > 0) {
-                facingCamVerts.push_back(vertices.at(blockTri.at(i).vert1.x));
-                facingCamVerts.push_back(vertices.at(blockTri.at(i).vert2.x));
-                facingCamVerts.push_back(vertices.at(blockTri.at(i).vert3.x));
+                facingCamTri.push_back(blockTri.at(i));
+                facingSurfNormPos.push_back(surfNormPos.at(i));
             }
         }
+        
+        // sort the faces and the position of the surface normals so the one that is cloest to the 
+        // camera will be at the start of the vector
+        quickSort(facingSurfNormPos, facingCamTri, 0, facingCamTri.size() - 1, camCord);
 
+        // reverse the order of the faces and store the vertices to the buffer. So the face that is 
+        // furthest from the camera will be drawn first.
+        for (int i = facingCamTri.size() - 1; i >= 0; i--) {
+            facingCamVerts.push_back(vertices.at(facingCamTri.at(i).vert1.x));
+            facingCamVerts.push_back(vertices.at(facingCamTri.at(i).vert2.x));
+            facingCamVerts.push_back(vertices.at(facingCamTri.at(i).vert3.x));
+        }
         // calculate the projection of the 3d verticies
         for (int i = 0; i < facingCamVerts.size(); i++) {
             screenVert.push_back(facingCamVerts.at(i).projection(k1, k2, width, height));
@@ -145,62 +161,111 @@ int main() {
         // for each arragements (point 1-2, 2-3, 3-1). And yes the order of which we insert the
         // vertex object matters since the buffer uses those points to connect the lines
         for (int i = 0; (i + 2) < screenVert.size(); i += 3) {
-            buff.append(Vector2f(static_cast<float>(screenVert.at(i).x),
-                                 static_cast<float>(screenVert.at(i).y)));
-            buff.append(Vector2f(static_cast<float>(screenVert.at(i + 1).x),
-                                 static_cast<float>(screenVert.at(i + 1).y)));
+            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i).x),
+                                     static_cast<float>(screenVert.at(i).y)));
+            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i + 1).x),
+                                     static_cast<float>(screenVert.at(i + 1).y)));
 
-            buff.append(Vector2f(static_cast<float>(screenVert.at(i + 1).x),
-                                 static_cast<float>(screenVert.at(i + 1).y)));
-            buff.append(Vector2f(static_cast<float>(screenVert.at(i + 2).x),
-                                 static_cast<float>(screenVert.at(i + 2).y)));
+            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i + 1).x),
+                                     static_cast<float>(screenVert.at(i + 1).y)));
+            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i + 2).x),
+                                     static_cast<float>(screenVert.at(i + 2).y)));
 
-            buff.append(Vector2f(static_cast<float>(screenVert.at(i + 2).x),
-                                 static_cast<float>(screenVert.at(i + 2).y)));
-            buff.append(Vector2f(static_cast<float>(screenVert.at(i).x),
-                                 static_cast<float>(screenVert.at(i).y)));
+            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i + 2).x),
+                                     static_cast<float>(screenVert.at(i + 2).y)));
+            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i).x),
+                                     static_cast<float>(screenVert.at(i).y)));
+
+            buffTri.append(Vector2f(static_cast<float>(screenVert.at(i).x),
+                                    static_cast<float>(screenVert.at(i).y)));
+            buffTri.append(Vector2f(static_cast<float>(screenVert.at(i + 1).x),
+                                    static_cast<float>(screenVert.at(i + 1).y)));
+            buffTri.append(Vector2f(static_cast<float>(screenVert.at(i + 2).x),
+                                    static_cast<float>(screenVert.at(i + 2).y)));                           
         }
-        // cout << "   screenVert.size(): " << screenVert.size() << endl;
-        // cout << "   buff.getVertexCount(): " << buff.getVertexCount() << endl;
-
+        
         // clear the window with black background
         window.clear(sf::Color::Black);
-        // draw & display stuff
-        window.draw(buff);
+
+        // Draw the black triangle to cover the existing lines on the canvas and the white outline 
+        // to show the triangle  
+        for (int i = 0; i < buffTri.getVertexCount(); i += 3) {
+            sf::VertexArray tempTri(sf::Triangles, 3);
+            tempTri[0].position = Vector2f(buffTri[i].position.x, buffTri[i].position.y);
+            tempTri[1].position = Vector2f(buffTri[i + 1].position.x, buffTri[i + 1].position.y);
+            tempTri[2].position = Vector2f(buffTri[i + 2].position.x, buffTri[i + 2].position.y);
+            tempTri[0].color = Color::Black;
+            tempTri[1].color = Color::Black;
+            tempTri[2].color = Color::Black;
+
+            sf::VertexArray tempLine(sf::Lines, 6);                
+            for (int j = 0; j < 6; j += 2) {
+                tempLine[j].position = Vector2f(buffLine[i * 2 + j].position.x, 
+                                                buffLine[i * 2 + j].position.y);
+                tempLine[j + 1].position = Vector2f(buffLine[i * 2 + j + 1].position.x, 
+                                                    buffLine[i * 2 + j + 1].position.y);
+            }
+            window.draw(tempTri);
+            window.draw(tempLine);
+        }
+
         window.display();
 
-        // clear the facing cam vert
+        // clear all the buffer vertices and faces
         facingCamVerts.clear();
-        // clear the screenVert so we can redo that again in the next loop
+        facingCamTri.clear();
+        facingSurfNormPos.clear();
         screenVert.clear();
         // clear the buffer so the canvas is clean
-        buff.clear();
-
+        buffLine.clear();
+        buffTri.clear();
+        
         // Update the rotation angle
         if (!pause) {
             rotX += 0.1;
-            rotY += 0.3;
+            rotY += 0.17;
             // rotZ += 0.3;
         }
-        else if (up) {
-            rotX += 1;
-            up = false;
-        }
-        else if (down) {
-            rotX -= 1;
-            down = false;
-        }
-        else if (left) {
-            rotY -= 1;
-            left = false;
-        }
-        else if (right) {
-            rotY += 1;
-            right = false;
-        }
+        if (up) { rotX += 0.2; }
+        if (down) { rotX -= 0.2; }
+        if (left) { rotY -= 0.2; }
+        if (right) { rotY += 0.2; }
     }
 
-    cout << "..Finished\n"
-         << endl;
+    cout << "..Finished\n" << endl;
     return 0;
+}
+
+void quickSort(vector<Vec3d> &arr, vector<Faces> &target, int low, int high, Vec3d &camPos) {
+    if (low < high) {
+        int pi = partition(arr, target, low, high, camPos);
+        quickSort(arr, target, low, pi - 1, camPos);
+        quickSort(arr, target, pi + 1, high, camPos);
+    }
+}
+
+int partition(vector<Vec3d> &arr, vector<Faces> &target, int low, int high, Vec3d &camPos) {
+    double pivot = arr.at(high).distanceSquared(camPos);
+    int i = low - 1;
+    for (int j = low; j <= high - 1; j++) {
+        if (arr.at(j).distanceSquared(camPos) <= pivot) {
+            i++;
+            //swap arr[i] and arr[j]
+            Vec3d temp = arr.at(j);
+            arr.at(j) = arr.at(i);
+            arr.at(i) = temp;
+            Faces temp2 = target.at(j);
+            target.at(j) = target.at(i);
+            target.at(i) = temp2;
+        }
+    }
+    // swap arr[i + 1], arr[high]
+    Vec3d temp = arr.at(high);
+    arr.at(high) = arr.at(i + 1);
+    arr.at(i + 1) = temp;
+    Faces temp2 = target.at(high);
+    target.at(high) = target.at(i + 1);
+    target.at(i + 1) = temp2;
+
+    return (i + 1);
 }

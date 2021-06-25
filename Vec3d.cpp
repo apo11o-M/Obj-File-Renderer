@@ -34,6 +34,17 @@ Vec3d::Vec3d(vector<int> vec) {
     }
 }
 
+double Vec3d::length() {
+    return sqrt(x * x + y * y + z * z);
+}
+
+double Vec3d::distanceSquared(Vec3d& vec) {
+    double xLen = vec.x - x;
+    double yLen = vec.y - y;
+    double zLen = vec.z - z;
+    return (xLen * xLen + yLen * yLen + zLen * zLen);
+}
+
 Vec3d Vec3d::cross(Vec3d& vec) {
     Vec3d result;
     result.x = y * vec.z - z * vec.y;

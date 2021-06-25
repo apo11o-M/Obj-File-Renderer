@@ -28,6 +28,16 @@ class Vec3d {
         Vec3d(vector<int> vec);
 
         /**
+            Calculate the length of the vector 
+        */
+        double length();
+
+        /**
+            Calculate the distance of the two 3d points 
+        */
+        double distanceSquared(Vec3d& vec);
+
+        /**
             Calculate the cross product of the two vectors
         */
         Vec3d cross(Vec3d& vec);
