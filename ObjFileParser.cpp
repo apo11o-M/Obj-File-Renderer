@@ -32,7 +32,7 @@ void ObjFileParser::parseObjFile(string filename) {
                 stringstream check1(line);
                 while (getline(check1, vert, ' ')) {
                     if (vert != "v") {
-                        vecSingle.at(i) = stod(vert) * 2;
+                        vecSingle.at(i) = stod(vert) * 1.5;
                         // vecSingle.at(i) = stod(vert);
                         i++;
                     }

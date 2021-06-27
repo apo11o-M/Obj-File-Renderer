@@ -31,6 +31,7 @@ int main() {
 
     // The width and height of the window
     const int width = 1000, height = 700;
+    // const int width = 750, height = 500;
     // The rotation rate at each axis in degrees, default is 0
     double rotX = 0, rotY = 0, rotZ = 0;
     // The distance between the object and the viewer
@@ -60,8 +61,8 @@ int main() {
     // ObjModel block("ObjFiles/default_cube.obj");
     // ObjModel block("ObjFiles/cone.obj");
     // ObjModel block("ObjFiles/sphere.obj");
-    ObjModel block("ObjFiles/torus.obj");
-    // ObjModel block("ObjFiles/utah_teapot_resized.obj");
+    // ObjModel block("ObjFiles/torus.obj");
+    ObjModel block("ObjFiles/utah_teapot_final.obj");
 
 
     // The model's original vertices, represents the actual coord of the model in the 3d space
@@ -266,8 +267,8 @@ int main() {
         
         // Update the rotation angle
         if (!pause) {
-            rotX += 0.18;
-            rotY += 0.25;
+            rotX -= 0.02;
+            rotY += 0.27;
             // rotZ += 0.3;
         }
         if (up) { rotX += 0.4; }
