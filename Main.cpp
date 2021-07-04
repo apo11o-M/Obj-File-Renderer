@@ -44,6 +44,8 @@ int main() {
     Vec3d lightCord = {300, -600, -700};
     // The base color of the surface of the object, (r, g, b)
     int baseRed = 255, baseGreen = 255, baseBlue = 255;
+    // Ambient light intensity
+    int ambientIntensity = 20;
     // the framerate/update rate
     int framerate = 144;
     // whether or not pause the game
@@ -53,7 +55,8 @@ int main() {
 
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(width, height), "yo the window is showing stuff", sf::Style::Default, settings);
+    sf::RenderWindow window(sf::VideoMode(width, height), "yo the window is showing stuff", 
+                                          sf::Style::Default, settings);
     window.setFramerateLimit(framerate);
     FPS fps;
     
@@ -69,6 +72,8 @@ int main() {
     vector<Vec3d> blockVert = block.getVert();
     // The model's original triangles, represents the actual coord of the model in the 3d space
     vector<Faces> blockTri = block.getTri();
+    // The model's vertex normals
+    vector<Vec3d> blockVertNorm = block.getVertNorm();
     // The model's surface normal vectors
     vector<Vec3d> blockSurfNorm = block.getSurfNorm();
     // The model's surface normals' positions
@@ -142,6 +147,7 @@ int main() {
         for (int i = 0; i < blockSurfNormPos.size(); i++) {
             surfNormPos.at(i) = blockSurfNormPos.at(i).rotation(rotX, rotY, rotZ);
         }
+
         // calculate the facing of those faces, if a face is facing towards us, add its verticies
         // to the array to calculate the projection
         for (int i = 0; i < blockTri.size(); i++) {
@@ -167,8 +173,8 @@ int main() {
             facingCamVerts.push_back(vertices.at(facingCamTri.at(i).vert3.x));
         }
 
-        // find the flux of the light source going through the face, and then adjust the brightness
-        // of that surface based on its original color.     
+        // find the flux of the light source vector going through the face, and then adjust the
+        // brightness of that surface based on its original color.     
         for (int i = facingCamTri.size() - 1; i >= 0; i--) {
             Vec3d target = facingSurfNormPos.at(i);
             Vec3d temp = lightCord - target;
@@ -178,6 +184,9 @@ int main() {
             red = clip(baseRed * flux, 0, 255);
             green = clip(baseGreen * flux, 0, 255);
             blue = clip(baseBlue * flux, 0, 255);
+            red = clip(red + ambientIntensity, 0, 255);
+            green = clip(green + ambientIntensity, 0, 255);
+            blue = clip(blue + ambientIntensity, 0, 255);
             facingSurfColor.push_back(Color(red, green, blue));
         }
 
@@ -235,17 +244,18 @@ int main() {
             // tempTri[1].color = Color::Black;
             // tempTri[2].color = Color::Black;
 
-            // sf::VertexArray tempLine(sf::Lines, 6);                
+            // sf::VertexArray tempLine(sf::Lines, 6);
             // for (int j = 0; j < 6; j += 2) {
             //     tempLine[j].position = Vector2f(buffLine[i * 2 + j].position.x, 
             //                                     buffLine[i * 2 + j].position.y);
             //     tempLine[j + 1].position = Vector2f(buffLine[i * 2 + j + 1].position.x, 
             //                                         buffLine[i * 2 + j + 1].position.y);
-            //     tempLine[j].color = facingSurfColor.at(counter);
-            //     tempLine[j + 1].color = facingSurfColor.at(counter);
-            //     // tempLine[j].color = Color::White;
-            //     // tempLine[j + 1].color = Color::White;
+            //     // tempLine[j].color = facingSurfColor.at(counter);
+            //     // tempLine[j + 1].color = facingSurfColor.at(counter);
+            //     tempLine[j].color = Color::White;
+            //     tempLine[j + 1].color = Color::White;
             // }
+
             window.draw(tempTri);
             // window.draw(tempLine);
             counter++;
