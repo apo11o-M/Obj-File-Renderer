@@ -1,4 +1,4 @@
-# Obj File Renderer
+# Obj File Renderer (Flat Shading)
 
 ![Obj_File_Renderer_Demo](https://user-images.githubusercontent.com/54286072/123527089-87178680-d691-11eb-9a35-92b0945c0e0d.gif)
 
