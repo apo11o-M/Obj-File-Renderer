@@ -20,7 +20,7 @@ void ObjFileParser::parseObjFile(string filename) {
     }
 
     // start getline and do stuff
-    vector<double> vecSingle(3);
+    vector<float> vecSingle(3);
     vector<int> faceSingle(9);
     string line, face, vert;
     int i = 0;
@@ -79,7 +79,6 @@ void ObjFileParser::parseObjFile(string filename) {
                 Vec3d v2(faceSingle.at(3), faceSingle.at(4), faceSingle.at(5));
                 Vec3d v3(faceSingle.at(6), faceSingle.at(7), faceSingle.at(8));
                 faces.push_back(Faces(v1, v2, v3));
-            
             }
         }
         

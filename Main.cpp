@@ -10,6 +10,7 @@
 #include "ObjFileParser.h"
 #include "3DModels/ObjModel.h"
 #include "3DModels/Faces.h"
+#include "util.h"
 // #include "3DModels/Pyramid.h"
 // #include "3DModels/Cube.h"
 
@@ -19,12 +20,9 @@ using std::cout;
 using std::endl;
 using std::vector;
 using sf::Color;
+using sf::Uint8;
 using sf::Vector2f;
-
-void quickSort(vector<Vec3d> &arr, vector<Faces> &target, vector<Vec3d> &target2, int low, int high, Vec3d &camPos);
-int partition(vector<Vec3d> &arr, vector<Faces> &target, vector<Vec3d> &target2, int low, int high, Vec3d &camPos);
-void swap(Vec3d &a, Vec3d &b);
-double clip(double n, double lower, double upper);
+using namespace util;
 
 int main() {
     cout << "\nProgram Start.." << endl;
@@ -33,15 +31,15 @@ int main() {
     const int width = 1000, height = 700;
     // const int width = 750, height = 500;
     // The rotation rate at each axis in degrees, default is 0
-    double rotX = 0, rotY = 0, rotZ = 0;
+    float rotX = 0, rotY = 0, rotZ = 0;
     // The distance between the object and the viewer
-    double k2 = 800.0;
+    float k2 = 800.0;
     // The distance between the object and the screen
-    double k1 = 700.0;
+    float k1 = 700.0;
     // The camera's coordinates
-    Vec3d camCord = {0, 0, -k2};
+    Vec3d camCord = {0.0, 0.0, -k2};
     // The position of the light source
-    Vec3d lightCord = {300, -600, -700};
+    Vec3d lightCord = {300.0, -600.0, -700.0};
     // The base color of the surface of the object, (r, g, b)
     int baseRed = 255, baseGreen = 255, baseBlue = 255;
     // Ambient light intensity
@@ -52,6 +50,8 @@ int main() {
     bool pause = true;
     // Keypress boolean 
     bool right = false, left = false, up = false, down = false;
+    // Smooth angle threshold
+    float smoothAngle = 15;
 
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
@@ -59,14 +59,12 @@ int main() {
                                           sf::Style::Default, settings);
     window.setFramerateLimit(framerate);
     FPS fps;
-    
 
-    // ObjModel block("ObjFiles/default_cube.obj");
-    // ObjModel block("ObjFiles/cone.obj");
-    // ObjModel block("ObjFiles/sphere.obj");
-    // ObjModel block("ObjFiles/torus.obj");
-    ObjModel block("ObjFiles/utah_teapot_final.obj");
-
+    // ObjModel block("ObjFiles/default_cube.obj", smoothAngle);
+    // ObjModel block("ObjFiles/cone.obj", smoothAngle);
+    // ObjModel block("ObjFiles/sphere.obj", smoothAngle);
+    // ObjModel block("ObjFiles/torus.obj", smoothAngle);
+    ObjModel block("ObjFiles/utah_teapot_final.obj", smoothAngle);
 
     // The model's original vertices, represents the actual coord of the model in the 3d space
     vector<Vec3d> blockVert = block.getVert();
@@ -79,9 +77,11 @@ int main() {
     // The model's surface normals' positions
     vector<Vec3d> blockSurfNormPos = block.getSurfNormPos();
 
-    // The buffer vertices for the block
+    // The buffer vertices
     vector<Vec3d> vertices = block.getVert();
-    // The buffer surface normals for the block
+    // The buffer vertex normals
+    vector<Vec3d> vertNorm = block.getVertNorm(); 
+    // The buffer surface normals
     vector<Vec3d> surfNorm = block.getSurfNorm();
     // The buffer position of the surfNorm vertices
     vector<Vec3d> surfNormPos = block.getSurfNormPos();
@@ -89,23 +89,26 @@ int main() {
     vector<Vec3d> facingCamVerts;
     // The triangle that faces the camera, will sort from the furthest to the cloest to the camera
     vector<Faces> facingCamTri;
-    // The surface normal that faces the triangles, for lighting purpose.
-    vector<Vec3d> facingSurfNorm;
     // The position of the surfNorm vertices that are facing the camera
     vector<Vec3d> facingSurfNormPos;
 
     // The final buffer that stores the color of the faces that are facing the camera
-    vector<Color> facingSurfColor; 
+    vector<Color> facingVertColor; 
     // The buffer coordinates of the model on a 2D screen.
     vector<Vec2d> screenVert;
 
-    // The buff vertex array stores all the lines that we will be drawing
-    sf::VertexArray buffLine(sf::Lines, 0);
-    sf::VertexArray buffTri(sf::Triangles, 0);
-
+    sf::Texture texture;
+    if (!texture.create(width, height)) {
+        cout << "Error creating the texture" << endl;
+        return -1;
+    }
+    texture.setSmooth(true);    
+    sf::Sprite sprite(texture);
 
     // start the game loop
     while (window.isOpen()) {
+        Uint8* pixels = new Uint8[width * height * 4];
+
         // Event handlers
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -131,206 +134,152 @@ int main() {
             }
         }
 
-        // update the window's title to the current frame per second
         fps.update();
         window.setTitle("yo the window is showing stuff, Fps: " + std::to_string(fps.getFPS()));
 
-        // calculate the rotation for each vertices
+        // Do the rotation for the vertices
         for (int i = 0; i < blockVert.size(); i++) {
             vertices.at(i) = blockVert.at(i).rotation(rotX, rotY, rotZ);
         }
-        // calculate the rotation for each surface normals
+        for (int i = 0; i < blockVertNorm.size(); i++) {
+            vertNorm.at(i) = blockVertNorm.at(i).rotation(rotX, rotY, rotZ);
+        }
         for (int i = 0; i < blockSurfNorm.size(); i++) {
             surfNorm.at(i) = blockSurfNorm.at(i).rotation(rotX, rotY, rotZ);
         }
-        // calculate the rotation for each surface normal's position
         for (int i = 0; i < blockSurfNormPos.size(); i++) {
             surfNormPos.at(i) = blockSurfNormPos.at(i).rotation(rotX, rotY, rotZ);
-        }
+        }   // need this to calculate the distance between the face and the camera
 
-        // calculate the facing of those faces, if a face is facing towards us, add its verticies
-        // to the array to calculate the projection
+        // calculate the facing of the triangles
         for (int i = 0; i < blockTri.size(); i++) {
             Vec3d centroid = surfNormPos.at(i);
-            Vec3d temp = camCord - centroid;
-            double dotProduct = surfNorm.at(i).dot(temp);
-            if (dotProduct > 0) {
+            Vec3d dist = camCord - centroid;
+            float dotProd = surfNorm.at(i).dot(dist);
+            if (dotProd > 0) {
                 facingCamTri.push_back(blockTri.at(i));
-                facingSurfNorm.push_back(surfNorm.at(i));
                 facingSurfNormPos.push_back(surfNormPos.at(i));
             }
         }
 
-        // sort the faces and the position of the surface normals so the one that is cloest to the 
-        // camera will be at the start of the vector
-        quickSort(facingSurfNormPos, facingCamTri, facingSurfNorm, 0, facingCamTri.size() - 1, camCord);
+        // quickSort the facingCamTri, painter's algorithm
+        quickSort(facingSurfNormPos, facingCamTri, 0, facingCamTri.size() - 1, camCord);
 
-        // reverse the order of the faces and store the vertices to the buffer. So the face that is 
-        // furthest from the camera will be drawn first.
+        // store the faces' vertices into the facingCamVerts
         for (int i = facingCamTri.size() - 1; i >= 0; i--) {
             facingCamVerts.push_back(vertices.at(facingCamTri.at(i).vert1.x));
             facingCamVerts.push_back(vertices.at(facingCamTri.at(i).vert2.x));
             facingCamVerts.push_back(vertices.at(facingCamTri.at(i).vert3.x));
         }
 
-        // find the flux of the light source vector going through the face, and then adjust the
-        // brightness of that surface based on its original color.     
+        // calculate the light information based on the vertex normal and its position
         for (int i = facingCamTri.size() - 1; i >= 0; i--) {
-            Vec3d target = facingSurfNormPos.at(i);
-            Vec3d temp = lightCord - target;
-            int red, green, blue;
-            double flux = facingSurfNorm.at(i).dot(temp);
-            flux = flux / temp.length() / facingSurfNorm.at(i).length();    
+            Faces target = facingCamTri.at(i);
+            Vec3d temp = lightCord - vertices.at(target.vert1.x);
+            Uint8 red, green, blue;
+            float flux;
+
+            flux = vertNorm.at(target.vert1.z).dot(temp);
+            flux = flux / (temp).length() / vertNorm.at(target.vert1.z).length();
             red = clip(baseRed * flux, 0, 255);
             green = clip(baseGreen * flux, 0, 255);
             blue = clip(baseBlue * flux, 0, 255);
-            red = clip(red + ambientIntensity, 0, 255);
-            green = clip(green + ambientIntensity, 0, 255);
-            blue = clip(blue + ambientIntensity, 0, 255);
-            facingSurfColor.push_back(Color(red, green, blue));
+            facingVertColor.push_back(Color(red, green, blue));
+            
+            Vec3d vert2 = vertices.at(target.vert2.x);
+            temp = lightCord - vert2;
+            flux = vertNorm.at(target.vert2.z).dot(temp);
+            flux = flux / (temp).length() / vertNorm.at(target.vert2.z).length();
+            red = clip(baseRed * flux, 0, 255);
+            green = clip(baseGreen * flux, 0, 255);
+            blue = clip(baseBlue * flux, 0, 255);
+            facingVertColor.push_back(Color(red, green, blue));
+            
+            Vec3d vert3 = vertices.at(target.vert3.x);
+            temp = lightCord - vert3;
+            flux = vertNorm.at(target.vert3.z).dot(temp);
+            flux = flux / (temp).length() / vertNorm.at(target.vert3.z).length();
+            red = clip(baseRed * flux, 0, 255);
+            green = clip(baseGreen * flux, 0, 255);
+            blue = clip(baseBlue * flux, 0, 255);
+            facingVertColor.push_back(Color(red, green, blue));
         }
 
-        // calculate the projection of the 3d verticies
+        // Calculate the projection of the vertices in 3D space onto the screen
         for (int i = 0; i < facingCamVerts.size(); i++) {
             screenVert.push_back(facingCamVerts.at(i).projection(k1, k2, width, height));
         }
 
-        // store the 2D verticies that we calculated from the previous rotation and projection
-        // calculation into the buffer so the SFML knows what to draw. Use the blockTri that shows
-        // the vertices that forms the triangles, we would need a total of 3 lines, or 6 points
-        // for each arragements (point 1-2, 2-3, 3-1). And yes the order of which we insert the
-        // vertex object matters since the buffer uses those points to connect the lines
-        for (int i = 0; (i + 2) < screenVert.size(); i += 3) {
-            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i).x),
-                                     static_cast<float>(screenVert.at(i).y)));
-            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i + 1).x),
-                                     static_cast<float>(screenVert.at(i + 1).y)));
+        // Goes through every single triangle, look through every pixel that is enclosed by the 
+        // rectangle(which also encloses the triangle) and use the shoelace method to calculate the 
+        // weight of the colors at each vertices to the specific pixel.  
+        for (int i = 0; i < screenVert.size(); i += 3) {
+            Vec2d A = screenVert.at(i);                 // Here are the three points of the triangle
+            Vec2d B = screenVert.at(i + 1);
+            Vec2d C = screenVert.at(i + 2);
+            int yMin = std::min({A.y, B.y, C.y});       // Here are the boundaries of the rectangle
+            int yMax = std::max({A.y, B.y, C.y});       // that encloses the triangle 
+            int xMin = std::min({A.x, B.x, C.x});
+            int xMax = std::max({A.x, B.x, C.x});
 
-            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i + 1).x),
-                                     static_cast<float>(screenVert.at(i + 1).y)));
-            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i + 2).x),
-                                     static_cast<float>(screenVert.at(i + 2).y)));
-
-            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i + 2).x),
-                                     static_cast<float>(screenVert.at(i + 2).y)));
-            buffLine.append(Vector2f(static_cast<float>(screenVert.at(i).x),
-                                     static_cast<float>(screenVert.at(i).y)));
-
-            buffTri.append(Vector2f(static_cast<float>(screenVert.at(i).x),
-                                    static_cast<float>(screenVert.at(i).y)));
-            buffTri.append(Vector2f(static_cast<float>(screenVert.at(i + 1).x),
-                                    static_cast<float>(screenVert.at(i + 1).y)));
-            buffTri.append(Vector2f(static_cast<float>(screenVert.at(i + 2).x),
-                                    static_cast<float>(screenVert.at(i + 2).y)));                           
-        }
-        
-        // clear the window with black background
-        window.clear(sf::Color::Black);
-
-        // Draw the triangles with the calculated color to cover the existing lines on the canvas   
-        // And tbh, since we're making the outline to have the same color as the faces in this case,
-        // we don't really need to draw the outlines anymore, (We needed to draw the outlines when 
-        // I was still working on the lighting) so I commentted it out for performance sake.  
-        int counter = 0;
-        for (int i = 0; i < buffTri.getVertexCount(); i += 3) {
-            sf::VertexArray tempTri(sf::Triangles, 3);
-            tempTri[0].position = Vector2f(buffTri[i].position.x, buffTri[i].position.y);
-            tempTri[1].position = Vector2f(buffTri[i + 1].position.x, buffTri[i + 1].position.y);
-            tempTri[2].position = Vector2f(buffTri[i + 2].position.x, buffTri[i + 2].position.y);
-            tempTri[0].color = facingSurfColor.at(counter);
-            tempTri[1].color = facingSurfColor.at(counter);
-            tempTri[2].color = facingSurfColor.at(counter);
-            // tempTri[0].color = Color::Black;
-            // tempTri[1].color = Color::Black;
-            // tempTri[2].color = Color::Black;
-
-            // sf::VertexArray tempLine(sf::Lines, 6);
-            // for (int j = 0; j < 6; j += 2) {
-            //     tempLine[j].position = Vector2f(buffLine[i * 2 + j].position.x, 
-            //                                     buffLine[i * 2 + j].position.y);
-            //     tempLine[j + 1].position = Vector2f(buffLine[i * 2 + j + 1].position.x, 
-            //                                         buffLine[i * 2 + j + 1].position.y);
-            //     // tempLine[j].color = facingSurfColor.at(counter);
-            //     // tempLine[j + 1].color = facingSurfColor.at(counter);
-            //     tempLine[j].color = Color::White;
-            //     tempLine[j + 1].color = Color::White;
-            // }
-
-            window.draw(tempTri);
-            // window.draw(tempLine);
-            counter++;
+            for (int y = yMin; y <= yMax; y++) {        // Calculate the lighting for each pixel in  
+                for (int x = xMin; x <= xMax; x++) {    // the enclosed rectangle
+                    int index = coordToIndex(x, y, width, height);
+                    if (index != -1) {
+                        float ABC = calcArea(A, B, C);
+                        Vec2d P = Vec2d(x, y);
+                        float alpha = calcArea(P, B, C) / ABC;
+                        float beta = calcArea(A, P, C) / ABC;
+                        float gamma = calcArea(A, B, P) / ABC;
+                        if (alpha > 0 && beta > 0 && gamma > 0) {
+                            Color AColor = facingVertColor.at(i);
+                            Color BColor = facingVertColor.at(i + 1);
+                            Color CColor = facingVertColor.at(i + 2);
+                            Uint8 r = AColor.r * alpha + BColor.r * beta + CColor.r * gamma;
+                            Uint8 g = AColor.g * alpha + BColor.g * beta + CColor.g * gamma;
+                            Uint8 b = AColor.b * alpha + BColor.b * beta + CColor.b * gamma;
+                            pixels[index] = clip(r + ambientIntensity, 0, 255);
+                            pixels[index + 1] = clip(g + ambientIntensity, 0, 255);
+                            pixels[index + 2] = clip(b + ambientIntensity, 0, 255);
+                            pixels[index + 3] = 255;
+                        }
+                    }
+                }
+            }        
         }
 
+        texture.update(pixels);
+        window.clear(Color::Black);
+        window.draw(sprite);
         window.display();
 
-        // clear all the buffer vertices and faces
-        facingCamVerts.clear();
-        facingCamTri.clear();
-        facingSurfNorm.clear();
+        // // clear all the buffer vertices and faces
         facingSurfNormPos.clear();
-        facingSurfColor.clear();
+        facingCamTri.clear();
+        facingCamVerts.clear();
+        facingVertColor.clear();
         screenVert.clear();
-        
-        // clear the buffer so the canvas is clean
-        buffLine.clear();
-        buffTri.clear();
-        
-        // Update the rotation angle
+        delete[] pixels;
+
+        // // Update the rotation angle
         if (!pause) {
             rotX -= 0.02;
             rotY += 0.27;
             // rotZ += 0.3;
         }
-        if (up) { rotX += 0.4; }
-        if (down) { rotX -= 0.4; }
-        if (left) { rotY -= 0.4; }
-        if (right) { rotY += 0.4; }
+        // if (up) { rotX += 5; }
+        // if (down) { rotX -= 5; }
+        // if (left) { rotY -= 5; }
+        // if (right) { rotY += 5; }
+        if (up) { rotX += 1.5; }
+        if (down) { rotX -= 1.5; }
+        if (left) { rotY -= 1.5; }
+        if (right) { rotY += 1.5; }
     }
+
 
     cout << "..Finished\n" << endl;
-    return 0;
+
+    return EXIT_SUCCESS;
 }
 
-void quickSort(vector<Vec3d> &arr, vector<Faces> &target, vector<Vec3d> &target2, int low, int high, Vec3d &camPos) {
-    if (low < high) {
-        int pi = partition(arr, target, target2, low, high, camPos);
-        quickSort(arr, target, target2, low, pi - 1, camPos);
-        quickSort(arr, target, target2, pi + 1, high, camPos);
-    }
-}
-
-int partition(vector<Vec3d> &arr, vector<Faces> &target, vector<Vec3d> &target2, int low, int high, Vec3d &camPos) {
-    double pivot = arr.at(high).distanceSquared(camPos);
-    int i = low - 1;
-    for (int j = low; j <= high - 1; j++) {
-        if (arr.at(j).distanceSquared(camPos) <= pivot) {
-            i++;
-            //swap arr[i] and arr[j]
-            Vec3d temp = arr.at(j);
-            arr.at(j) = arr.at(i);
-            arr.at(i) = temp;
-            Faces temp2 = target.at(j);
-            target.at(j) = target.at(i);
-            target.at(i) = temp2;
-            Vec3d temp3 = target2.at(j);
-            target2.at(j) = target2.at(i);
-            target2.at(i) = temp3;
-        }
-    }
-    // swap arr[i + 1], arr[high]
-    Vec3d temp = arr.at(high);
-    arr.at(high) = arr.at(i + 1);
-    arr.at(i + 1) = temp;
-    Faces temp2 = target.at(high);
-    target.at(high) = target.at(i + 1);
-    target.at(i + 1) = temp2;
-    Vec3d temp3 = target2.at(high);
-    target2.at(high) = target2.at(i + 1);
-    target2.at(i + 1) = temp3;
-
-    return (i + 1);
-}
-
-double clip(double n, double lower, double upper) {
-    return std::max(lower, std::min(n, upper));
-}

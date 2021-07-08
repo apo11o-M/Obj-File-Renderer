@@ -12,13 +12,13 @@ Vec3d::Vec3d(const Vec3d& vec) {
     z = vec.z;
 }
 
-Vec3d::Vec3d(double x, double y, double z) {
+Vec3d::Vec3d(float x, float y, float z) {
     this->x = x;
     this->y = y;
     this->z = z;
 }
 
-Vec3d::Vec3d(vector<double> vec) {
+Vec3d::Vec3d(vector<float> vec) {
     if (vec.size() == 3) {
         x = vec.at(0);
         y = vec.at(1);
@@ -34,14 +34,14 @@ Vec3d::Vec3d(vector<int> vec) {
     }
 }
 
-double Vec3d::length() {
+float Vec3d::length() {
     return sqrt(x * x + y * y + z * z);
 }
 
-double Vec3d::distanceSquared(Vec3d& vec) {
-    double xLen = vec.x - x;
-    double yLen = vec.y - y;
-    double zLen = vec.z - z;
+float Vec3d::distanceSquared(Vec3d& vec) {
+    float xLen = vec.x - x;
+    float yLen = vec.y - y;
+    float zLen = vec.z - z;
     return (xLen * xLen + yLen * yLen + zLen * zLen);
 }
 
@@ -53,24 +53,23 @@ Vec3d Vec3d::cross(Vec3d& vec) {
     return result;
 }
 
-double Vec3d::dot(Vec3d& vec) {
+float Vec3d::dot(Vec3d& vec) {
     return (x * vec.x + y * vec.y + z * vec.z);
 }
 
 Vec3d Vec3d::normalize() {
-    Vec3d result(x, y, z);
-    double length = sqrt((x * x) + (y * y) + (z * z));
-    return (result / length);
+    Vec3d result = Vec3d(x, y, z);
+    float length = sqrt((x * x) + (y * y) + (z * z));
+    return result / length;
 }
 
-Vec3d Vec3d::rotation(double rotX, double rotY, double rotZ) {
+Vec3d Vec3d::rotation(float rotX, float rotY, float rotZ) {
     Vec3d result;
     rotX *= M_PI / 180.0;
     rotY *= M_PI / 180.0;
     rotZ *= M_PI / 180.0;
-    double sRotX = std::sin(rotX), sRotY = std::sin(rotY), sRotZ = std::sin(rotZ);
-    double cRotX = std::cos(rotX), cRotY = std::cos(rotY), cRotZ = std::cos(rotZ);
-
+    float sRotX = std::sin(rotX), sRotY = std::sin(rotY), sRotZ = std::sin(rotZ);
+    float cRotX = std::cos(rotX), cRotY = std::cos(rotY), cRotZ = std::cos(rotZ);
     result.x = (x * cRotX * cRotY) + (y * sRotX * cRotY) - (z * sRotY);
     result.y = (x * (cRotX * sRotY * sRotZ - sRotX * cRotZ)) + (y * (sRotX * sRotY * sRotZ + cRotX * cRotZ))
                     + (z * cRotY * sRotZ);
@@ -79,11 +78,10 @@ Vec3d Vec3d::rotation(double rotX, double rotY, double rotZ) {
     return result;
 }
 
-Vec2d Vec3d::projection(double k1, double k2, int width, int height) {
+Vec2d Vec3d::projection(float k1, float k2, int width, int height) {
     Vec2d result;
     result.x = (k1 * x / (k2 + z)) + width / 2;
     result.y = (k1 * y / (k2 + z)) + height / 2;
-
     // The 2D coordinates in the buffer is centered in the top left corner of the window
     // since the coordinate system in sfml window has the orgin in the top left. We have
     // to offset the points in the buffer by half of the width/height of the window
@@ -106,7 +104,7 @@ Vec3d Vec3d::operator-(const Vec3d& vec) {
     return result;
 }
 
-Vec3d Vec3d::operator*(const double val) {
+Vec3d Vec3d::operator*(const float val) {
     Vec3d result;
     result.x = this->x * val;
     result.y = this->y * val;
@@ -114,7 +112,7 @@ Vec3d Vec3d::operator*(const double val) {
     return result;
 }
 
-Vec3d Vec3d::operator/(const double val) {
+Vec3d Vec3d::operator/(const float val) {
     Vec3d result;
     result.x = this->x / val;
     result.y = this->y / val;

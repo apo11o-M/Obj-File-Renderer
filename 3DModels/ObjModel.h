@@ -13,6 +13,7 @@ class ObjModel : public Object {
     public:
         ObjModel();
         ObjModel(std::string filename);
+        ObjModel(std::string filename, float angle);
 
     private:
         /** Calculate the surface normal from the cross product of 

@@ -15,27 +15,28 @@ using std::ostream;
 
 class Vec3d {
     public:
-        double x;
-        double y;
-        double z;
+        float x;
+        float y;
+        float z;
 
     public:
         // constructors
         Vec3d();
         Vec3d(const Vec3d& vec);
-        Vec3d(double x, double y, double z);
-        Vec3d(vector<double> vec);
+        Vec3d(float x, float y, float z);
         Vec3d(vector<int> vec);
+        Vec3d(vector<float> vec);
+        Vec3d(vector<double> vec);
 
         /**
             Calculate the length of the vector 
         */
-        double length();
+        float length();
 
         /**
-            Calculate the distance of the two 3d points 
+            Calculate the distance squared of the two 3d points 
         */
-        double distanceSquared(Vec3d& vec);
+        float distanceSquared(Vec3d& vec);
 
         /**
             Calculate the cross product of the two vectors
@@ -45,7 +46,7 @@ class Vec3d {
         /**
             Calculate the dot product of the two vectors
         */
-        double dot(Vec3d& vec);
+        float dot(Vec3d& vec);
 
         /**
             Normalize the vector
@@ -58,7 +59,7 @@ class Vec3d {
             @param rot Amount of rotation angle on each axis
             @return The rotated 3D points
         */ 
-        Vec3d rotation(double rotX, double rotY, double rotZ);
+        Vec3d rotation(float rotX, float rotY, float rotZ);
 
         /** 
             Do the projection that converts the passed in 3D points to the 2D points that will be 
@@ -69,13 +70,13 @@ class Vec3d {
             @param distOV Object & viewer distance
             @return The projected 2D points onto the screen
         */        
-        Vec2d projection(double k1, double k2, int width, int height);
+        Vec2d projection(float k1, float k2, int width, int height);
     
     public:
         Vec3d operator+(const Vec3d& vec);
         Vec3d operator-(const Vec3d& vec);
-        Vec3d operator*(const double val);
-        Vec3d operator/(const double val);
+        Vec3d operator*(const float val);
+        Vec3d operator/(const float val);
         void operator=(const Vec3d& vec); 
         friend ostream& operator<<(ostream& os, const Vec3d& vec);
 
