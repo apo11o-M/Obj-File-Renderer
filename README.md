@@ -1,6 +1,7 @@
 # Obj File Renderer
 
-![Obj_File_Renderer_Demo](https://user-images.githubusercontent.com/54286072/123527089-87178680-d691-11eb-9a35-92b0945c0e0d.gif)
+<!-- ![Obj_File_Renderer_Demo](https://user-images.githubusercontent.com/54286072/123527089-87178680-d691-11eb-9a35-92b0945c0e0d.gif) -->
+![Obj_File_Renderer_Demo2](https://user-images.githubusercontent.com/54286072/124899745-4541e680-df95-11eb-939c-2e20ecdff6d2.gif)
 
 ## What is this?
 Obj File Renderer is a program that renders OBJ files to a 2D display using C++ and the SFML Library. In other words, it reads in a 3D model file that consists of the vertices and the faces data of the 3D model, do some fancy rotations, calculate the lighting of each individual faces, then project those points onto the 2D screen.
@@ -13,12 +14,20 @@ Currently I am still experimenting with the concept so it still has limited feat
 
 - Originally inspired by the Japanese Minecraft player EMB4 who created the MCHeli Minecraft Mod using .obj 3D models for the vehicles, link to the website: https://www.curseforge.com/minecraft/mc-mods/mcheli-minecraft-helicopter-mod.
 - Also Inspired by Andy Sloane from his Donut C program, link to his website: https://www.a1k0n.net/2011/07/20/donut-math.html.
-- Massive thanks for professor Craig Schroeder for clarifying some confusions I have about the 3D rendering pipeline.
+- Massive thanks for professor Craig Schroeder for guiding me and clarifying some confusions I have about the 3D rendering pipeline.
 
 ## Major Updates
 
+### 7/8/2021
+- Implemented the Gouraud Shading algorithm so the surfaces looks smoother. The color at each pixel is the combined weight of each color at the triangles' vertices.
+- Reworked on how SFML renders the object.
+
+<!-- ![07082021 Gouraud Shading](https://user-images.githubusercontent.com/54286072/124899366-e4b2a980-df94-11eb-8ec5-265bae4226a0.gif) -->
+<img src="https://user-images.githubusercontent.com/54286072/124899366-e4b2a980-df94-11eb-8ec5-265bae4226a0.gif" width="504" height="354"> <br />
+
+
 ### 6/26/2021
-- Added lighting to the surfaces, the calculation is based on the angle between the individual faces with respect to the light source using dot product.
+- Added lighting to the surfaces (flat shading), the calculation is based on the angle between the individual faces with respect to the light source using dot product.
 
 <!-- ![06262021 Basic Lighting](https://user-images.githubusercontent.com/54286072/123527859-d791e280-d697-11eb-924b-b595f573cde3.gif) <br /> -->
 <img src="https://user-images.githubusercontent.com/54286072/123527859-d791e280-d697-11eb-924b-b595f573cde3.gif" width="504" height="354"> <br />
