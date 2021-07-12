@@ -263,8 +263,8 @@ int main() {
 
         // // Update the rotation angle
         if (!pause) {
-            rotX -= 0.02;
-            rotY += 0.27;
+            rotX -= 0.04;
+            rotY += 0.5;
             // rotZ += 0.3;
         }
         // if (up) { rotX += 5; }
