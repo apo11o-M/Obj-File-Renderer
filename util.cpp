@@ -15,7 +15,7 @@ namespace util {
         double pivot = arr.at(high).distanceSquared(camPos);
         int i = low - 1;
         for (int j = low; j <= high - 1; j++) {
-            if (arr.at(j).distanceSquared(camPos) <= pivot) {
+            if (arr.at(j).distanceSquared(camPos) >= pivot) {
                 i++;
                 //swap arr[i] and arr[j]
                 Vec3d temp = arr.at(j);

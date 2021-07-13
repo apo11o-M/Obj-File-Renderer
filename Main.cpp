@@ -166,43 +166,10 @@ int main() {
         quickSort(facingSurfNormPos, facingCamTri, 0, facingCamTri.size() - 1, camCord);
 
         // store the faces' vertices into the facingCamVerts
-        for (int i = facingCamTri.size() - 1; i >= 0; i--) {
+        for (int i = 0; i < facingCamTri.size(); i++) {
             facingCamVerts.push_back(vertices.at(facingCamTri.at(i).vert1.x));
             facingCamVerts.push_back(vertices.at(facingCamTri.at(i).vert2.x));
             facingCamVerts.push_back(vertices.at(facingCamTri.at(i).vert3.x));
-        }
-
-        // calculate the light information based on the vertex normal and its position
-        for (int i = facingCamTri.size() - 1; i >= 0; i--) {
-            Faces target = facingCamTri.at(i);
-            Vec3d temp = lightCord - vertices.at(target.vert1.x);
-            Uint8 red, green, blue;
-            float flux;
-
-            flux = vertNorm.at(target.vert1.z).dot(temp);
-            flux = flux / (temp).length() / vertNorm.at(target.vert1.z).length();
-            red = clip(baseRed * flux, 0, 255);
-            green = clip(baseGreen * flux, 0, 255);
-            blue = clip(baseBlue * flux, 0, 255);
-            facingVertColor.push_back(Color(red, green, blue));
-            
-            Vec3d vert2 = vertices.at(target.vert2.x);
-            temp = lightCord - vert2;
-            flux = vertNorm.at(target.vert2.z).dot(temp);
-            flux = flux / (temp).length() / vertNorm.at(target.vert2.z).length();
-            red = clip(baseRed * flux, 0, 255);
-            green = clip(baseGreen * flux, 0, 255);
-            blue = clip(baseBlue * flux, 0, 255);
-            facingVertColor.push_back(Color(red, green, blue));
-            
-            Vec3d vert3 = vertices.at(target.vert3.x);
-            temp = lightCord - vert3;
-            flux = vertNorm.at(target.vert3.z).dot(temp);
-            flux = flux / (temp).length() / vertNorm.at(target.vert3.z).length();
-            red = clip(baseRed * flux, 0, 255);
-            green = clip(baseGreen * flux, 0, 255);
-            blue = clip(baseBlue * flux, 0, 255);
-            facingVertColor.push_back(Color(red, green, blue));
         }
 
         // Calculate the projection of the vertices in 3D space onto the screen
@@ -211,8 +178,8 @@ int main() {
         }
 
         // Goes through every single triangle, look through every pixel that is enclosed by the 
-        // rectangle(which also encloses the triangle) and use the shoelace method to calculate the 
-        // weight of the colors at each vertices to the specific pixel.  
+        // rectangle (which also encloses the triangle) and use the shoelace method to calculate the
+        // weight of the normal and the position at each vertices to the specific pixel.
         for (int i = 0; i < screenVert.size(); i += 3) {
             Vec2d A = screenVert.at(i);                 // Here are the three points of the triangle
             Vec2d B = screenVert.at(i + 1);
@@ -231,13 +198,22 @@ int main() {
                         float alpha = calcArea(P, B, C) / ABC;
                         float beta = calcArea(A, P, C) / ABC;
                         float gamma = calcArea(A, B, P) / ABC;
-                        if (alpha > 0 && beta > 0 && gamma > 0) {
-                            Color AColor = facingVertColor.at(i);
-                            Color BColor = facingVertColor.at(i + 1);
-                            Color CColor = facingVertColor.at(i + 2);
-                            Uint8 r = AColor.r * alpha + BColor.r * beta + CColor.r * gamma;
-                            Uint8 g = AColor.g * alpha + BColor.g * beta + CColor.g * gamma;
-                            Uint8 b = AColor.b * alpha + BColor.b * beta + CColor.b * gamma;
+                        if (alpha > 0 && beta > 0 && gamma > 0) {   // if the pixel is in the rectangle
+                            Vec3d posA = facingCamVerts.at(i);          // The pos at each vertex
+                            Vec3d posB = facingCamVerts.at(i + 1);
+                            Vec3d posC = facingCamVerts.at(i + 2);
+                            Faces currFace = facingCamTri.at(i / 3);
+                            Vec3d normA = vertNorm.at(currFace.vert1.z);// The normal at each vertex
+                            Vec3d normB = vertNorm.at(currFace.vert2.z);
+                            Vec3d normC = vertNorm.at(currFace.vert3.z);
+                            Vec3d pPos = posA * alpha + posB * beta + posC * gamma;
+                            Vec3d pNorm = normA * alpha + normB * beta + normC * gamma;
+                            float flux = (lightCord - pPos).dot(pNorm);
+                            flux = flux / (lightCord - pPos).length() / pNorm.length();
+                            Uint8 r, g, b;
+                            r = clip(baseRed * flux, 0, 255);
+                            g = clip(baseGreen * flux, 0, 255);
+                            b = clip(baseBlue * flux, 0, 255);
                             pixels[index] = clip(r + ambientIntensity, 0, 255);
                             pixels[index + 1] = clip(g + ambientIntensity, 0, 255);
                             pixels[index + 2] = clip(b + ambientIntensity, 0, 255);
