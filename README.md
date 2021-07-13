@@ -1,7 +1,9 @@
 # Obj File Renderer
 
 <!-- ![Obj_File_Renderer_Demo](https://user-images.githubusercontent.com/54286072/123527089-87178680-d691-11eb-9a35-92b0945c0e0d.gif) -->
-![Obj_File_Renderer_Demo2](https://user-images.githubusercontent.com/54286072/124899745-4541e680-df95-11eb-939c-2e20ecdff6d2.gif)
+<!-- ![Obj_File_Renderer_Demo2](https://user-images.githubusercontent.com/54286072/124899745-4541e680-df95-11eb-939c-2e20ecdff6d2.gif) -->
+![Obj_File_Renderer_Demo3](https://user-images.githubusercontent.com/54286072/125536978-b37ac75a-2347-4e5f-b78c-b7ac4343d8f6.gif)
+
 
 ## What is this?
 Obj File Renderer is a program that renders OBJ files to a 2D display using C++ and the SFML Library. In other words, it reads in a 3D model file that consists of the vertices and the faces data of the 3D model, do some fancy rotations, calculate the lighting of each individual faces, then project those points onto the 2D screen.
@@ -17,6 +19,13 @@ Currently I am still experimenting with the concept so it still has limited feat
 - Massive thanks for professor Craig Schroeder for guiding me and clarifying some confusions I have about the 3D rendering pipeline.
 
 ## Major Updates
+
+### 7/13/2021
+- Implemented the Phong Shading algorithm so the pixel color is calculated based on the interpolated position and normals from the triangle's three vertices.  
+- Added a util class for all the helper functions. (It looks very pretty much the same as the gouraud shading algorithm because of the gif's low resolution, and the large number of triangles this teapot model has).
+<!-- ![07132021 Phong Shading](https://user-images.githubusercontent.com/54286072/125536764-632778bd-5cdc-4543-846b-9bf389d0616b.gif) -->
+<img src="https://user-images.githubusercontent.com/54286072/125536764-632778bd-5cdc-4543-846b-9bf389d0616b.gif" width="504" height="354"> <br />
+
 
 ### 7/8/2021
 - Implemented the Gouraud Shading algorithm so the surfaces looks smoother. The color at each pixel is the combined weight of each color at the triangles' vertices.
