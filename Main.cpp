@@ -28,8 +28,8 @@ int main() {
     cout << "\nProgram Start.." << endl;
 
     // The width and height of the window
-    const int width = 1000, height = 700;
-    // const int width = 750, height = 500;
+    // const int width = 1000, height = 700;
+    const int width = 750, height = 500;
     // The rotation rate at each axis in degrees, default is 0
     float rotX = 0, rotY = 0, rotZ = 0;
     // The distance between the object and the viewer
@@ -55,9 +55,20 @@ int main() {
 
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(width, height), "yo the window is showing stuff", 
+    sf::RenderWindow window(sf::VideoMode(width, height), "Obj File Renderer", 
                                           sf::Style::Default, settings);
     window.setFramerateLimit(framerate);
+
+    sf::Font font;
+    if (!font.loadFromFile("arial.ttf")) { return EXIT_FAILURE; }
+    sf::Text textInstruction;
+    textInstruction.setFont(font);
+    textInstruction.setString("Scroll Wheel up/down - Zoom in/out\nSpace - Pause/Play\nArrow Keys - Rotate Model");
+    textInstruction.setCharacterSize(16);
+    textInstruction.setFillColor(Color::White);
+    textInstruction.setLineSpacing(1.2);
+    textInstruction.setPosition(10, 10);
+
     FPS fps;
 
     // ObjModel block("ObjFiles/default_cube.obj", smoothAngle);
@@ -129,13 +140,34 @@ int main() {
                 else if (event.key.code == sf::Keyboard::Down) { down = false; }
                 else if (event.key.code == sf::Keyboard::Left) { left = false; }
                 else if (event.key.code == sf::Keyboard::Right) { right = false; }
+                break;
+            case (sf::Event::MouseWheelMoved):
+                if (event.mouseWheel.delta < 0) {
+                    for (int i = 0; i < vertices.size(); i++) {
+                        blockVert.at(i) = blockVert.at(i) * 0.9;
+                        blockSurfNormPos.at(i) = blockSurfNormPos.at(i) * 0.9;
+                    }
+                } else {
+                    for (int i = 0; i < vertices.size(); i++) {
+                        blockVert.at(i) = blockVert.at(i) * 1.1;
+                        blockSurfNormPos.at(i) = blockSurfNormPos.at(i) * 1.1;
+                    }
+                }
+                break;
             default:
                 break;
             }
         }
 
         fps.update();
-        window.setTitle("yo the window is showing stuff, Fps: " + std::to_string(fps.getFPS()));
+        window.setTitle("Obj File Renderer");
+        sf::Text textFPS;
+        textFPS.setFont(font);
+        textFPS.setString("Fps: " + std::to_string(fps.getFPS()));
+        textFPS.setCharacterSize(16);
+        textFPS.setFillColor(Color::White);
+        textFPS.setLineSpacing(1.2);
+        textFPS.setPosition(width - 75, 20);
 
         // Do the rotation for the vertices
         for (int i = 0; i < blockVert.size(); i++) {
@@ -227,6 +259,8 @@ int main() {
         texture.update(pixels);
         window.clear(Color::Black);
         window.draw(sprite);
+        window.draw(textInstruction);
+        window.draw(textFPS);
         window.display();
 
         // // clear all the buffer vertices and faces
@@ -237,7 +271,7 @@ int main() {
         screenVert.clear();
         delete[] pixels;
 
-        // // Update the rotation angle
+        // Update the rotation angle
         if (!pause) {
             rotX -= 0.04;
             rotY += 0.5;
@@ -253,9 +287,7 @@ int main() {
         if (right) { rotY += 1.5; }
     }
 
-
     cout << "..Finished\n" << endl;
-
     return EXIT_SUCCESS;
 }
 
