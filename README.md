@@ -2,7 +2,8 @@
 
 <!-- ![Obj_File_Renderer_Demo](https://user-images.githubusercontent.com/54286072/123527089-87178680-d691-11eb-9a35-92b0945c0e0d.gif) -->
 <!-- ![Obj_File_Renderer_Demo2](https://user-images.githubusercontent.com/54286072/124899745-4541e680-df95-11eb-939c-2e20ecdff6d2.gif) -->
-![Obj_File_Renderer_Demo3](https://user-images.githubusercontent.com/54286072/125536978-b37ac75a-2347-4e5f-b78c-b7ac4343d8f6.gif)
+<!-- ![Obj_File_Renderer_Demo3](https://user-images.githubusercontent.com/54286072/125536978-b37ac75a-2347-4e5f-b78c-b7ac4343d8f6.gif) -->
+![Obj_File_Renderer_Demo4](https://user-images.githubusercontent.com/54286072/125544049-0d1479e5-314a-4846-98cf-8ff3dc94f6b2.gif)
 
 
 ## What is this?
@@ -13,7 +14,6 @@ I decided to write every mathematics part from the ground up based on my underst
 Currently I am still experimenting with the concept so it still has limited features. In the future I will be constantly adding more stuff such as moveable camera and smoother lighting on the model.
 
 ## Credits
-
 - Originally inspired by the Japanese Minecraft player EMB4 who created the MCHeli Minecraft Mod using .obj 3D models for the vehicles, link to the website: https://www.curseforge.com/minecraft/mc-mods/mcheli-minecraft-helicopter-mod.
 - Also Inspired by Andy Sloane from his Donut C program, link to his website: https://www.a1k0n.net/2011/07/20/donut-math.html.
 - Massive thanks for professor Craig Schroeder for guiding me and clarifying some confusions I have about the 3D rendering pipeline.
@@ -21,8 +21,8 @@ Currently I am still experimenting with the concept so it still has limited feat
 ## Major Updates
 
 ### 7/13/2021
-- Implemented the Phong Shading algorithm so the pixel color is calculated based on the interpolated position and normals from the triangle's three vertices.  
-- Added a util class for all the helper functions. (It looks very pretty much the same as the gouraud shading algorithm because of the gif's low resolution, and the large number of triangles this teapot model has).
+- Implemented the Phong Shading algorithm so the pixel color is calculated based on the interpolated position and normals from the triangle's three vertices. (It looks very pretty much the same as the gouraud shading algorithm because of the gif's low resolution, and the large number of triangles this teapot model has).
+- Added a util class for all the helper functions. 
 <!-- ![07132021 Phong Shading](https://user-images.githubusercontent.com/54286072/125536764-632778bd-5cdc-4543-846b-9bf389d0616b.gif) -->
 <img src="https://user-images.githubusercontent.com/54286072/125536764-632778bd-5cdc-4543-846b-9bf389d0616b.gif" width="504" height="354"> <br />
 
