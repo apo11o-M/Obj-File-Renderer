@@ -1,7 +1,8 @@
 .vscode/*
 *.code-workspace
 *.o
-*.dll
+*.a
+*.out
 *.exe
 *.mp4
 Meeting with Professor Craig/questions_to_ask_prof.txt
