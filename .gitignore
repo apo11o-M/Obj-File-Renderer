@@ -20,6 +20,6 @@ Main(z_buffer).cpp
 CMakeFiles/
 *.cmake
 CMakeCache.txt
-Makefile
 main
 
+Makefile
