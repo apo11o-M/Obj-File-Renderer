@@ -75,7 +75,7 @@ int main() {
     // ObjModel block("ObjFiles/cone.obj", smoothAngle);
     // ObjModel block("ObjFiles/sphere.obj", smoothAngle);
     // ObjModel block("ObjFiles/torus.obj", smoothAngle);
-    ObjModel block("Obj_Files/utah_teapot_final.obj", smoothAngle);
+    ObjModel block("ObjFiles/utah_teapot_final.obj", smoothAngle);
 
     // The model's original vertices, represents the actual coord of the model in the 3d space
     vector<Vec3d> blockVert = block.getVert();
