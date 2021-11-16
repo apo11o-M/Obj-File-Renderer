@@ -1,11 +1,14 @@
 .vscode/*
 *.code-workspace
+*.vscode
 *.o
-*.a
-*.dll
+*.obj
 *.out
+*.a
+*.cmake
 *.exe
-*.mp4
+*.dll
+
 Meeting with Professor Craig/questions_to_ask_prof.txt
 Meeting with Professor Craig/Meeting with Professor Craig.mp4 - Shortcut.lnk
 /Demo Stuff
@@ -13,3 +16,10 @@ Meeting with Professor Craig/Meeting with Professor Craig.mp4 - Shortcut.lnk
 /Meeting with Professor Craig
 Main(Deprecated).cpp
 Main(z_buffer).cpp
+
+CMakeFiles/
+*.cmake
+CMakeCache.txt
+Makefile
+main
+
