@@ -12,6 +12,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 SET(CMAKE_CXX_STANDARD 11)
 
 ADD_SUBDIRECTORY(SFML)
-ADD_EXECUTABLE(main Fps.cpp Vec2d.cpp Vec3d.cpp util.cpp ObjFileParser.cpp 3DModels/ObjModel.cpp main.cpp)
+ADD_EXECUTABLE(main Fps.cpp Vec2d.cpp Vec3d.cpp util.cpp ObjFileParser.cpp 3DModels/ObjModel.cpp Main.cpp)
 
 TARGET_LINK_LIBRARIES(main sfml-graphics sfml-window sfml-system)
