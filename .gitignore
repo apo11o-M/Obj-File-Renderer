@@ -20,5 +20,7 @@ Main(z_buffer).cpp
 CMakeFiles/
 *.cmake
 CMakeCache.txt
-main
 Makefile
+
+.DS_Store
+main

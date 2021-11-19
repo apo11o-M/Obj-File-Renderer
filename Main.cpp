@@ -11,8 +11,6 @@
 #include "3DModels/ObjModel.h"
 #include "3DModels/Faces.h"
 #include "util.h"
-// #include "3DModels/Pyramid.h"
-// #include "3DModels/Cube.h"
 
 #define M_PI 3.14159265358979323846
 
